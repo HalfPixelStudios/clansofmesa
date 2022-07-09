@@ -1,9 +1,5 @@
 use bevy::prelude::*;
-use clansofmesa::{assetloader::*, camera::*, player::*};
-
-fn setup(mut cmd: Commands) {
-    cmd.spawn_bundle(OrthographicCameraBundle::new_2d());
-}
+use clansofmesa::{assetloader::*, camera::*, networking::*, player::*};
 
 fn main() {
     let mut app = App::new();
@@ -15,10 +11,11 @@ fn main() {
         });
 
     app.add_plugins(DefaultPlugins)
+        .add_plugin(NetworkingPlugin)
         .add_plugin(CameraPlugin)
         .add_plugin(AssetLoadPlugin);
 
-    app.add_plugin(PlayerPlugin).add_startup_system(setup);
+    app.add_plugin(PlayerPlugin);
 
     app.run();
 }

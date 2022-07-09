@@ -1,9 +1,10 @@
+use autodefault::autodefault;
 use bevy::prelude::*;
 
 #[derive(Component)]
 pub struct Player;
 
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct Movement {
     pub speed: f32,
 }
@@ -17,13 +18,15 @@ impl Plugin for PlayerPlugin {
     }
 }
 
+#[autodefault]
 fn spawn_player(mut cmd: Commands) {
     cmd.spawn_bundle(SpriteBundle {
         sprite: Sprite {
             color: Color::rgb(0., 0.47, 1.),
-            ..Default::default()
         },
-        ..Default::default()
+        transform: Transform {
+            scale: Vec3::splat(10.),
+        },
     })
     .insert(Player)
     .insert(Movement { speed: 100. });
