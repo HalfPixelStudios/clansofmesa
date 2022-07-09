@@ -13,25 +13,27 @@ bevy_ui = ["bevy/bevy_ui", "bevy/bevy_text", "bevy/bevy_render"]
 
 [dependencies]
 bevy = { version = "0.7.0", default-features = false, features = [ "render", "animation", "bevy_winit", "bevy_gilrs", "png", "hdr", "filesystem_watcher", "x11", "trace" ] }
-bevy_kira_audio = { version = "0.10.0", default-features = false, features = [ "wav" ] }
-bevy_rapier2d = { version = "0.14.1", features = ["debug-render"] }
-bevy-inspector-egui = { version = "0.11" }
-bevy_hanabi = { version = "0.2.0" }
-# kayak_ui = { git="https://github.com/StarArawn/kayak_ui", features = ["bevy_renderer"] }
+# bevy_kira_audio = { version = "0.10.0", default-features = false, features = [ "wav" ] }
+# bevy_rapier2d = { version = "0.14.1", features = ["debug-render"] }
+# bevy-inspector-egui = { version = "0.11" }
+# bevy_hanabi = { version = "0.2.0" }
+### kayak_ui = { git="https://github.com/StarArawn/kayak_ui", features = ["bevy_renderer"] }
 
 ggrs = { version = "0.9.0" }
-bevy_ggrs = { version = "0.9.0" }
+bevy_ggrs = { version = "0.9.0", features = ["wasm-bindgen"] }
 matchbox_socket = { version = "0.3", features = ["ggrs-socket"] }
 
 rand = { version = "0.8.5" }
 argparse = { git = "https://github.com/MrPicklePinosaur/pino.rs" }
 autodefault = { version = "2.0.0" }
 
-ron = "0.7.1"
-serde = { version = "1", features = ["derive"] }
+# ron = "0.7.1"
+# serde = { version = "1", features = ["derive"] }
 
-[lib]
-crate-type = ["cdylib", "rlib"]
+[patch.crates-io]
+ggrs = { git = "https://github.com/gschup/ggrs" }
+bevy_ggrs = { git = "https://github.com/gschup/bevy_ggrs" }
+matchbox_socket = { git = "https://github.com/johanhelsing/matchbox", branch = "main" }  
 
 [workspace]
 resolver = "2"

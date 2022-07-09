@@ -1,12 +1,20 @@
 use bevy::{prelude::*, tasks::IoTaskPool};
 use bevy_ggrs::*;
-use ggrs::PlayerType;
-use matchbox_socket::WebRtcNonBlockingSocket;
+use matchbox_socket::WebRtcSocket;
+
+struct GGRSConfig;
+
+impl ggrs::Config for GGRSConfig {
+    type Input = u8;
+    type State = u8;
+    type Address = String;
+}
 
 pub struct NetworkingPlugin;
 
 impl Plugin for NetworkingPlugin {
     fn build(&self, app: &mut App) {
+        GGRSPlugin::<GGRSConfig>::new().build(app);
         app.add_startup_system(start_server).add_system(lobby);
     }
 }
@@ -14,14 +22,14 @@ impl Plugin for NetworkingPlugin {
 fn start_server(mut cmd: Commands, task_pool: Res<IoTaskPool>) {
     let room_url = "ws://127.0.0.1:3536/next_2";
     info!("connecting to matchbox server: {:?}", room_url);
-    let (socket, message_loop) = WebRtcNonBlockingSocket::new(room_url);
+    let (socket, message_loop) = WebRtcSocket::new(room_url);
 
     task_pool.spawn(message_loop).detach();
 
     cmd.insert_resource(Some(socket));
 }
 
-fn lobby(mut cmd: Commands, mut socket: ResMut<Option<WebRtcNonBlockingSocket>>) {
+fn lobby(mut cmd: Commands, mut socket: ResMut<Option<WebRtcSocket>>) {
     let socket = socket.as_mut();
 
     // If there is no socket we've already started the game
@@ -39,29 +47,26 @@ fn lobby(mut cmd: Commands, mut socket: ResMut<Option<WebRtcNonBlockingSocket>>)
     }
 
     info!("All peers have joined, going in-game");
-    /*
-
-    // consume the socket (currently required because GGRS takes ownership of its socket)
-    let socket = socket.take().unwrap();
-
-    let max_prediction = 12;
 
     // create a GGRS P2P session
-    let mut p2p_session =
-        ggrs::P2PSession::new_with_socket(num_players as u32, INPUT_SIZE, max_prediction, socket);
+    let mut session_builder = ggrs::SessionBuilder::<GGRSConfig>::new()
+        .with_num_players(num_players)
+        .with_input_delay(2);
 
     for (i, player) in players.into_iter().enumerate() {
-        p2p_session
+        session_builder = session_builder
             .add_player(player, i)
             .expect("failed to add player");
-
-        if player == PlayerType::Local {
-            // set input delay for the local player
-            p2p_session.set_frame_delay(2, i).unwrap();
-        }
     }
 
+    // move the socket out of the resource (required because GGRS takes ownership of it)
+    let socket = socket.take().unwrap();
+
     // start the GGRS session
-    cmd.start_p2p_session(p2p_session);
-    */
+    let session = session_builder
+        .start_p2p_session(socket)
+        .expect("failed to start session");
+
+    cmd.insert_resource(session);
+    cmd.insert_resource(SessionType::P2PSession);
 }

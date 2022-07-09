@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_ggrs::*;
 use clansofmesa::{assetloader::*, camera::*, networking::*, player::*};
 
 fn main() {
