@@ -17,6 +17,7 @@ bevy_kira_audio = { version = "0.10.0", default-features = false, features = [ "
 bevy_rapier2d = { version = "0.14.1", features = ["debug-render"] }
 bevy-inspector-egui = { version = "0.11" }
 bevy_hanabi = { version = "0.2.0" }
+bevy_ggrs = {git="https://github.com/gschup/bevy_ggrs"}
 # kayak_ui = { git="https://github.com/StarArawn/kayak_ui", features = ["bevy_renderer"] }
 
 rand = "0.8.5"
