@@ -25,6 +25,9 @@ argparse = { git = "https://github.com/MrPicklePinosaur/pino.rs" }
 ron = "0.7.1"
 serde = { version = "1", features = ["derive"] }
 
+[lib]
+crate-type = ["cdylib", "rlib"]
+
 [workspace]
 resolver = "2"
 

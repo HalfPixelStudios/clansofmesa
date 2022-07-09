@@ -1,16 +1,17 @@
 use bevy::prelude::*;
+use clansofmesa::player;
 
-fn main() {
-    App::new()
-        .add_plugins(DefaultPlugins)
-        .add_startup_system(setup)
-        .run();
+fn setup(mut cmd: Commands) {
+    cmd.spawn_bundle(OrthographicCameraBundle::new_2d());
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
-    commands.spawn_bundle(SpriteBundle {
-        texture: asset_server.load("icon.png"),
-        ..Default::default()
-    });
+fn main() {
+    let mut app = App::new();
+
+    app.add_plugins(DefaultPlugins);
+
+    app.add_plugin(player::PlayerPlugin)
+        .add_startup_system(setup);
+
+    app.run();
 }
