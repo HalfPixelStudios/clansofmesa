@@ -2,7 +2,16 @@ use bevy::prelude::*;
 
 const ATLAS_WIDTH: usize = 203;
 const ATLAS_HEIGHT: usize = 169;
+
 pub struct AssetSheet(pub Handle<TextureAtlas>);
+
+pub struct AssetLoadPlugin;
+
+impl Plugin for AssetLoadPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_startup_system(load_assets);
+    }
+}
 
 pub fn load_assets(
     mut cmd: Commands,
@@ -20,10 +29,4 @@ pub fn load_assets(
     );
     let atlas_handle = texture_atlases.add(atlas);
     cmd.insert_resource(AssetSheet(atlas_handle));
-}
-pub struct AssetLoadPlugin;
-impl Plugin for AssetLoadPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_startup_system(load_assets);
-    }
 }

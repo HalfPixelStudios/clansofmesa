@@ -1,3 +1,5 @@
+pub mod models;
+
 use serde::de::DeserializeOwned;
 use std::collections::HashMap;
 use std::fs;
