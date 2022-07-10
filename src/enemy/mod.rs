@@ -6,8 +6,12 @@ use bevy_bobs::{
     component::health::Health,
     prefab::{models::*, *},
 };
+use bevy_ggrs::{Rollback, RollbackIdProvider};
 
-use self::prefab::*;
+use self::{
+    ai::{AIPlugin, DumbAI},
+    prefab::*,
+};
 use crate::assetloader::*;
 
 // temp define ron in string
@@ -16,6 +20,7 @@ const RON_STRING: &str = r#"
     "testing_enemy": (
         health: 100,
         reward: 20,
+        ai: Dumb ( speed: 1. ),
         sprite_index: 1,
         sprite_color: ColorRGB ( r: 1.0, g: 1.0, b: 1.0 ),
     )
@@ -51,7 +56,8 @@ pub struct EnemyPlugin;
 
 impl Plugin for EnemyPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(PrefabLib::<EnemyPrefab>::new(RON_STRING))
+        app.add_plugin(AIPlugin)
+            .insert_resource(PrefabLib::<EnemyPrefab>::new(RON_STRING))
             .add_event::<SpawnEnemyEvent>()
             .add_event::<DespawnEnemyEvent>()
             .add_startup_system(setup)
@@ -67,11 +73,12 @@ fn setup(mut writer: EventWriter<SpawnEnemyEvent>) {
     })
 }
 
-pub fn spawn_enemy_system(
+fn spawn_enemy_system(
     mut cmd: Commands,
     mut events: EventReader<SpawnEnemyEvent>,
     prefab_lib: Res<PrefabLib<EnemyPrefab>>,
     asset_sheet: Res<AssetSheet>,
+    mut rip: ResMut<RollbackIdProvider>,
 ) {
     for SpawnEnemyEvent { id, spawn_pos } in events.iter() {
         if let Some(prefab) = prefab_lib.get(id) {
@@ -94,11 +101,20 @@ pub fn spawn_enemy_system(
                     ..default()
                 },
             });
+
+            match prefab.ai {
+                AI::Dumb { speed } => {
+                    cmd.entity(e).insert(DumbAI::new(speed));
+                }
+                _ => {}
+            };
+
+            cmd.entity(e).insert(Rollback::new(rip.next_id()));
         }
     }
 }
 
-pub fn despawn_enemy_system(
+fn despawn_enemy_system(
     mut cmd: Commands,
     query: Query<(Entity, &Enemy, &Health)>,
     mut writer: EventWriter<DespawnEnemyEvent>,

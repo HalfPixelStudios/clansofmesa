@@ -3,8 +3,8 @@ use bevy::prelude::*;
 // dumb ai that attempts to move to target in straight line
 #[derive(Component)]
 pub struct DumbAI {
-    pub speed: f32,
-    pub target: Vec2,
+    speed: f32,
+    target: Option<Vec2>,
 }
 
 // ai with flocking behavior
@@ -27,9 +27,28 @@ impl Plugin for AIPlugin {
     }
 }
 
+impl DumbAI {
+    pub fn new(speed: f32) -> Self {
+        DumbAI {
+            speed,
+            target: None,
+        }
+    }
+    pub fn set_target(&mut self, target_pos: Vec2) {
+        self.target = Some(target_pos);
+    }
+    pub fn unset_target(&mut self) {
+        self.target = None;
+    }
+}
+
 pub fn dumb_ai_system(time: Res<Time>, mut query: Query<(&mut Transform, &DumbAI)>) {
     for (mut trans, ai) in query.iter_mut() {
-        let target_dir = (ai.target - trans.translation.truncate())
+        if ai.target.is_none() {
+            continue;
+        }
+
+        let target_dir = (ai.target.unwrap() - trans.translation.truncate())
             .normalize_or_zero()
             .extend(0.);
         trans.translation += ai.speed * target_dir * time.delta_seconds();
