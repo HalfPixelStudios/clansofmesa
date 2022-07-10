@@ -1260,6 +1260,7 @@ dependencies = [
  "autodefault",
  "bevy",
  "bevy_ggrs",
+ "bytemuck",
  "ggrs",
  "matchbox_socket",
  "rand",

@@ -1,25 +1,22 @@
 use autodefault::autodefault;
 use bevy::prelude::*;
+use bevy_ggrs::{Rollback, RollbackIdProvider};
+use ggrs::InputStatus;
 
-#[derive(Component)]
-pub struct Player;
+use crate::input::*;
+
+#[derive(Component, Default)]
+pub struct Player {
+    pub handle: usize,
+}
 
 #[derive(Component, Default)]
 pub struct Movement {
     pub speed: f32,
 }
 
-pub struct PlayerPlugin;
-
-impl Plugin for PlayerPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_startup_system(spawn_player)
-            .add_system(player_move_system);
-    }
-}
-
 #[autodefault]
-fn spawn_player(mut cmd: Commands) {
+pub fn spawn_player(mut cmd: Commands, mut rip: ResMut<RollbackIdProvider>) {
     cmd.spawn_bundle(SpriteBundle {
         sprite: Sprite {
             color: Color::rgb(0., 0.47, 1.),
@@ -28,30 +25,46 @@ fn spawn_player(mut cmd: Commands) {
             scale: Vec3::splat(10.),
         },
     })
-    .insert(Player)
-    .insert(Movement { speed: 100. });
+    .insert(Player { handle: 0 })
+    .insert(Movement { speed: 100. })
+    .insert(Rollback::new(rip.next_id()));
+
+    cmd.spawn_bundle(SpriteBundle {
+        sprite: Sprite {
+            color: Color::rgb(1., 0.47, 1.),
+        },
+        transform: Transform {
+            translation: Vec3::new(10., 0., 0.),
+            scale: Vec3::splat(10.),
+        },
+    })
+    .insert(Player { handle: 1 })
+    .insert(Movement { speed: 100. })
+    .insert(Rollback::new(rip.next_id()));
 }
 
-fn player_move_system(
+pub fn player_move_system(
     time: Res<Time>,
-    input: Res<Input<KeyCode>>,
-    mut query: Query<(&mut Transform, &Movement), With<Player>>,
+    inputs: Res<Vec<(PressedPack, InputStatus)>>,
+    mut query: Query<(&Player, &mut Transform, &Movement)>,
 ) {
-    let (mut transform, movement) = query.single_mut();
+    for (player, mut transform, movement) in query.iter_mut() {
+        let (pressed, _) = inputs[player.handle as usize];
 
-    let mut input_vec = Vec2::ZERO;
+        let mut move_dir = Vec2::ZERO;
 
-    if input.pressed(KeyCode::W) {
-        input_vec += Vec2::Y;
-    } else if input.pressed(KeyCode::S) {
-        input_vec -= Vec2::Y;
+        if pressed & INPUT_UP != 0 {
+            move_dir += Vec2::Y;
+        } else if pressed & INPUT_DOWN != 0 {
+            move_dir -= Vec2::Y;
+        }
+        if pressed & INPUT_LEFT != 0 {
+            move_dir -= Vec2::X;
+        } else if pressed & INPUT_RIGHT != 0 {
+            move_dir += Vec2::X;
+        }
+
+        let move_vec = move_dir.normalize_or_zero();
+        transform.translation += move_vec.extend(0.) * movement.speed * time.delta_seconds();
     }
-    if input.pressed(KeyCode::A) {
-        input_vec -= Vec2::X;
-    } else if input.pressed(KeyCode::D) {
-        input_vec += Vec2::X;
-    }
-
-    let move_vec = input_vec.normalize_or_zero();
-    transform.translation += move_vec.extend(0.) * movement.speed * time.delta_seconds();
 }
