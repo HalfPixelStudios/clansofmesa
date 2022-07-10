@@ -3,4 +3,4 @@ pub mod assetloader;
 pub mod camera;
 pub mod input;
 pub mod networking;
-pub mod player;
+pub mod structure;

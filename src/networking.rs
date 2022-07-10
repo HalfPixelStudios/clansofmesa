@@ -3,12 +3,12 @@ use bevy_ggrs::*;
 use ggrs::PlayerType;
 use matchbox_socket::WebRtcSocket;
 
-use crate::input::PressedPack;
+use crate::input::*;
 
 pub struct GGRSConfig;
 
 impl ggrs::Config for GGRSConfig {
-    type Input = PressedPack;
+    type Input = NetInput;
     type State = u8;
     type Address = String;
 }
