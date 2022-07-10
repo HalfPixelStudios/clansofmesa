@@ -2,10 +2,12 @@ use bevy::{prelude::*, tasks::IoTaskPool};
 use bevy_ggrs::*;
 use matchbox_socket::WebRtcSocket;
 
-struct GGRSConfig;
+use crate::input::GGRSInput;
+
+pub struct GGRSConfig;
 
 impl ggrs::Config for GGRSConfig {
-    type Input = u8;
+    type Input = GGRSInput;
     type State = u8;
     type Address = String;
 }
@@ -14,7 +16,6 @@ pub struct NetworkingPlugin;
 
 impl Plugin for NetworkingPlugin {
     fn build(&self, app: &mut App) {
-        GGRSPlugin::<GGRSConfig>::new().build(app);
         app.add_startup_system(start_server).add_system(lobby);
     }
 }

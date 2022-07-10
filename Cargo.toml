@@ -26,6 +26,7 @@ matchbox_socket = { version = "0.3", features = ["ggrs-socket"] }
 rand = { version = "0.8.5" }
 argparse = { git = "https://github.com/MrPicklePinosaur/pino.rs" }
 autodefault = { version = "2.0.0" }
+bytemuck = { version = "1.10.0" }
 
 # ron = "0.7.1"
 # serde = { version = "1", features = ["derive"] }
