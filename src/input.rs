@@ -1,4 +1,5 @@
 use super::camera::*;
+use super::map::*;
 use bevy::prelude::*;
 use bytemuck::{Pod, Zeroable};
 use ggrs::PlayerHandle;
@@ -27,10 +28,11 @@ pub fn input_system(
         info!("{:?}", PLACE);
         pressed |= PLACE;
     }
+    let (grid_x, grid_y) = snap_to_grid(cursor.0);
 
     NetInput {
         pressed,
-        grid_x: cursor.0.x as i32,
-        grid_y: cursor.0.y as i32,
+        grid_x: grid_x - 8,
+        grid_y: grid_y - 8,
     }
 }
