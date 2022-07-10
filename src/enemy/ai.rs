@@ -7,15 +7,6 @@ pub struct DumbAI {
     pub target: Vec2,
 }
 
-pub fn dumb_ai_system(time: Res<Time>, mut query: Query<(&mut Transform, &DumbAI)>) {
-    for (mut trans, ai) in query.iter_mut() {
-        let target_dir = (ai.target - trans.translation.truncate())
-            .normalize_or_zero()
-            .extend(0.);
-        trans.translation += ai.speed * target_dir * time.delta_seconds();
-    }
-}
-
 // ai with flocking behavior
 #[derive(Component, Clone)]
 pub struct BoidAI {
@@ -26,6 +17,23 @@ pub struct BoidAI {
     pub steering: f32,
     pub alignment: f32,
     heading: Vec2, // direction currently travelling in
+}
+
+pub struct AIPlugin;
+
+impl Plugin for AIPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_system(dumb_ai_system).add_system(boid_ai_system);
+    }
+}
+
+pub fn dumb_ai_system(time: Res<Time>, mut query: Query<(&mut Transform, &DumbAI)>) {
+    for (mut trans, ai) in query.iter_mut() {
+        let target_dir = (ai.target - trans.translation.truncate())
+            .normalize_or_zero()
+            .extend(0.);
+        trans.translation += ai.speed * target_dir * time.delta_seconds();
+    }
 }
 
 pub fn boid_ai_system(mut query: Query<(Entity, &mut Transform, &BoidAI)>) {
