@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy_ggrs::*;
 use clansofmesa::{app_state::*, assetloader::*, camera::*, input::*, networking::*, structure::*};
 
+
 fn main() {
     let mut app = App::new();
 
@@ -23,6 +24,7 @@ fn main() {
         });
 
     app.add_plugins(DefaultPlugins)
+        .add_plugin(MapPlugin)
         .add_plugin(NetworkingPlugin)
         .add_plugin(CameraPlugin)
         .add_plugin(AssetLoadPlugin)
