@@ -1,4 +1,6 @@
 use super::assetloader::*;
+use bevy_ecs_ldtk::prelude::*;
+
 use super::camera::*;
 use super::input::*;
 use super::map::*;
@@ -15,13 +17,18 @@ pub struct SpawnStructureEvent {
 #[derive(Component)]
 pub struct SelectUI;
 
+pub struct BuildData {
+    placeable: bool,
+}
+
 pub struct StructurePlugin;
 impl Plugin for StructurePlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<SpawnStructureEvent>()
             .add_system(spawn_structure)
             .add_startup_system(spawn_select_ui)
-            .add_system(move_select_ui);
+            .add_system(check_placeable)
+            .insert_resource(BuildData { placeable: false });
     }
 }
 pub fn spawn_select_ui(mut cmd: Commands, assets: Res<AssetSheet>) {
@@ -35,17 +42,33 @@ pub fn spawn_select_ui(mut cmd: Commands, assets: Res<AssetSheet>) {
     })
     .insert(SelectUI);
 }
-pub fn move_select_ui(
+
+pub fn check_placeable(
     mut select_query: Query<(&mut Transform, &mut TextureAtlasSprite), With<SelectUI>>,
+    mut intgrid_query: Query<(&mut IntGridCell, &GridCoords), Without<SelectUI>>,
     cursor: Res<Cursor>,
+    mut build_data: ResMut<BuildData>,
 ) {
     let (mut transform, mut sprite) = select_query.single_mut();
     let (grid_x, grid_y) = snap_to_grid(cursor.0);
 
-    info!("{:?}", to_grid_coords(grid_x, grid_y));
+    let (ldtk_x, ldtk_y) = to_grid_coords(grid_x, grid_y);
+    build_data.placeable = true;
+    for (cell, coords) in intgrid_query.iter() {
+        sprite.color = Color::WHITE;
+        if coords.x == ldtk_x && coords.y == ldtk_y {
+            info!("{:?}", cell.value);
+            if cell.value == 1 {
+                build_data.placeable = false;
+                sprite.color = Color::BLACK;
+                break;
+            }
+        }
+    }
 
     transform.translation.x = grid_x as f32 - 8.;
     transform.translation.y = grid_y as f32 - 8.;
+    transform.translation.z = 100.;
 }
 
 pub fn spawn_structure(
@@ -75,9 +98,10 @@ pub fn spawn_structure(
 pub fn place_structure(
     inputs: Res<Vec<(NetInput, InputStatus)>>,
     mut spawn_event: EventWriter<SpawnStructureEvent>,
+    build_data: Res<BuildData>,
 ) {
     let (input, _) = inputs[0];
-    if input.pressed & PLACE != 0 {
+    if (input.pressed & PLACE != 0) && build_data.placeable {
         spawn_event.send(SpawnStructureEvent {
             spawn_pos: Vec3::new(input.grid_x as f32, input.grid_y as f32, 0.),
             index: 0,

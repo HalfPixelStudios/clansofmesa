@@ -34,7 +34,7 @@ fn setup(mut cmd: Commands, asset_server: Res<AssetServer>) {
 //     }
 // }
 pub fn to_grid_coords(x: i32, y: i32) -> (i32, i32) {
-    return (x / TILEWIDTH as i32 + 8, y / TILEWIDTH as i32 + 8);
+    return (x / TILEWIDTH as i32 + 7, y / TILEWIDTH as i32 + 7);
 }
 pub fn snap_to_grid(pos: Vec2) -> (i32, i32) {
     let mut snapped = ((pos / TILEWIDTH).ceil() * TILEWIDTH).round();
