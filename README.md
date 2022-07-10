@@ -20,3 +20,7 @@ $ cargo run
 ```
 cargo run --target wasm32-unknown-unknown
 ```
+
+## SUB CRATES
+
+**bevy_bobs** - commonly used bits and bobs utilities for bevy games
