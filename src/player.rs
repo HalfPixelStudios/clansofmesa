@@ -1,5 +1,6 @@
 use autodefault::autodefault;
 use bevy::prelude::*;
+use bevy_ggrs::{Rollback, RollbackIdProvider};
 use ggrs::InputStatus;
 
 use crate::input::*;
@@ -15,7 +16,7 @@ pub struct Movement {
 }
 
 #[autodefault]
-pub fn spawn_player(mut cmd: Commands) {
+pub fn spawn_player(mut cmd: Commands, mut rip: ResMut<RollbackIdProvider>) {
     cmd.spawn_bundle(SpriteBundle {
         sprite: Sprite {
             color: Color::rgb(0., 0.47, 1.),
@@ -25,7 +26,21 @@ pub fn spawn_player(mut cmd: Commands) {
         },
     })
     .insert(Player { handle: 0 })
-    .insert(Movement { speed: 100. });
+    .insert(Movement { speed: 100. })
+    .insert(Rollback::new(rip.next_id()));
+
+    cmd.spawn_bundle(SpriteBundle {
+        sprite: Sprite {
+            color: Color::rgb(1., 0.47, 1.),
+        },
+        transform: Transform {
+            translation: Vec3::new(10., 0., 0.),
+            scale: Vec3::splat(10.),
+        },
+    })
+    .insert(Player { handle: 1 })
+    .insert(Movement { speed: 100. })
+    .insert(Rollback::new(rip.next_id()));
 }
 
 pub fn player_move_system(

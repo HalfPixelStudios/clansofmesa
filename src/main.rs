@@ -14,6 +14,7 @@ fn main() {
                                                                             // .with_system_set(SystemSet::on_enter(AppState::InGame).with_system(spawn_player))
                                                                             // .with_system_set(SystemSet::on_update(AppState::InGame).with_system(player_move_system))
         ))
+        .register_rollback_type::<Transform>()
         .build(&mut app);
 
     app.insert_resource(ClearColor(Color::rgb(0.5, 0.5, 0.5)))
