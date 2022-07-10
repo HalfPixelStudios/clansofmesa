@@ -11,7 +11,7 @@ fn main() {
         .with_input_system(input_system)
         .with_rollback_schedule(Schedule::default().with_stage(
             "ROLLBACK_STAGE",
-            SystemStage::single_threaded().with_system(place_structure), // .with_system_set(SystemSet::on_update(AppState::InGame).with_system(player_move_system))
+            SystemStage::parallel().with_system(place_structure), // .with_system_set(SystemSet::on_update(AppState::InGame).with_system(player_move_system))
         ))
         .register_rollback_type::<Transform>()
         .build(&mut app);
@@ -25,7 +25,8 @@ fn main() {
     app.add_plugins(DefaultPlugins)
         .add_plugin(NetworkingPlugin)
         .add_plugin(CameraPlugin)
-        .add_plugin(AssetLoadPlugin);
+        .add_plugin(AssetLoadPlugin)
+        .add_plugin(StructurePlugin);
     //.add_startup_system(spawn_player);
 
     app.run();

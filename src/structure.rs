@@ -15,7 +15,8 @@ pub struct SpawnStructureEvent {
 pub struct StructurePlugin;
 impl Plugin for StructurePlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<SpawnStructureEvent>();
+        app.add_event::<SpawnStructureEvent>()
+            .add_system(spawn_structure);
     }
 }
 
