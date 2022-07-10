@@ -1,22 +1,14 @@
 pub mod ai;
+pub mod prefab;
 
 use bevy::prelude::*;
 use bevy_bobs::{
     component::health::Health,
     prefab::{models::*, *},
 };
-use serde::Deserialize;
 
+use self::prefab::*;
 use crate::assetloader::*;
-
-#[derive(Deserialize, Clone)]
-pub struct EnemyPrefab {
-    pub display_name: String,
-    pub health: u32,
-    pub reward: u32,
-    pub sprite_index: usize,
-    pub sprite_color: ColorRGB,
-}
 
 pub struct SpawnEnemyEvent {
     pub id: PrefabId,
@@ -39,6 +31,8 @@ pub struct EnemyBundle {
     pub enemy: Enemy,
     pub health: Health,
     pub reward: Reward,
+    #[bundle]
+    pub sprite_sheet: SpriteSheetBundle,
 }
 
 pub fn spawn_enemy_system(
@@ -50,13 +44,11 @@ pub fn spawn_enemy_system(
     for SpawnEnemyEvent { id, spawn_pos } in events.iter() {
         if let Some(prefab) = prefab_lib.get(id) {
             let e = cmd.spawn().id();
-            cmd.entity(e)
-                .insert_bundle(EnemyBundle {
-                    enemy: Enemy(id.into()),
-                    health: Health::new(prefab.health),
-                    reward: Reward(prefab.reward),
-                })
-                .insert_bundle(SpriteSheetBundle {
+            cmd.entity(e).insert_bundle(EnemyBundle {
+                enemy: Enemy(id.into()),
+                health: Health::new(prefab.health),
+                reward: Reward(prefab.reward),
+                sprite_sheet: SpriteSheetBundle {
                     sprite: TextureAtlasSprite {
                         index: prefab.sprite_index,
                         color: prefab.sprite_color.into(),
@@ -68,7 +60,8 @@ pub fn spawn_enemy_system(
                         ..default()
                     },
                     ..default()
-                });
+                },
+            });
         }
     }
 }

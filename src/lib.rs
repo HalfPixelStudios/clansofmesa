@@ -1,5 +1,6 @@
 pub mod app_state;
 pub mod assetloader;
+pub mod bullet;
 pub mod camera;
 pub mod enemy;
 pub mod input;
