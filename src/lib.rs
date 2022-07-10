@@ -5,4 +5,4 @@ pub mod enemy;
 pub mod input;
 pub mod map;
 pub mod networking;
-pub mod player;
+pub mod structure;
