@@ -1,0 +1,8 @@
+{
+    "testing_enemy": (
+        health: 100,
+        reward: 20,
+        sprite_index: 1,
+        sprite_color: ColorRGB ( r: 1.0, g: 1.0, b: 1.0 ),
+    )
+}

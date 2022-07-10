@@ -1,6 +1,10 @@
 use bevy::prelude::*;
 use std::ops::Deref;
 
+#[cfg(feature = "egui")]
+use bevy_inspector_egui::Inspectable;
+
+#[cfg_attr(feature = "egui", derive(Inspectable))]
 #[derive(Component, Clone, Eq, PartialEq)]
 pub struct Health {
     original_hp: u32,
