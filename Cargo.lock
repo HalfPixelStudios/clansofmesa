@@ -1403,6 +1403,7 @@ dependencies = [
  "ggrs",
  "matchbox_socket",
  "rand",
+ "serde",
 ]
 
 [[package]]

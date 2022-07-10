@@ -31,7 +31,7 @@ autodefault = { version = "2.0.0" }
 bytemuck = { version = "1.10.0" }
 
 # ron = "0.7.1"
-# serde = { version = "1", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
 
 [patch.crates-io]
 ggrs = { git = "https://github.com/gschup/ggrs" }
