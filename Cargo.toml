@@ -18,7 +18,7 @@ bevy_ecs_ldtk = { version = "0.3.0", features = [ "atlas" ] }
 # bevy_rapier2d = { version = "0.14.1", features = ["debug-render"] }
 # bevy-inspector-egui = { version = "0.11" }
 # bevy_hanabi = { version = "0.2.0" }
-### kayak_ui = { git="https://github.com/StarArawn/kayak_ui", features = ["bevy_renderer"] }
+kayak_ui = { git="https://github.com/StarArawn/kayak_ui", features = ["bevy_renderer"] }
 bevy_bobs = { path = "crates/bevy_bobs" }
 
 ggrs = { version = "0.9.0" }
