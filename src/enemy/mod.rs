@@ -1,6 +1,5 @@
 pub mod ai;
 
-use autodefault::autodefault;
 use bevy::prelude::*;
 use bevy_bobs::{
     component::health::Health,
@@ -10,7 +9,7 @@ use serde::Deserialize;
 
 use crate::assetloader::*;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub struct EnemyPrefab {
     pub display_name: String,
     pub health: u32,
@@ -20,12 +19,17 @@ pub struct EnemyPrefab {
 }
 
 pub struct SpawnEnemyEvent {
-    pub id: String,
+    pub id: PrefabId,
     pub spawn_pos: Vec2,
 }
 
+pub struct DespawnEnemyEvent {
+    pub entity: Entity,
+    pub prefab: EnemyPrefab,
+}
+
 #[derive(Component)]
-pub struct Enemy;
+pub struct Enemy(pub PrefabId);
 
 #[derive(Component)]
 pub struct Reward(pub u32);
@@ -37,17 +41,6 @@ pub struct EnemyBundle {
     pub reward: Reward,
 }
 
-impl Default for EnemyBundle {
-    fn default() -> Self {
-        EnemyBundle {
-            enemy: Enemy,
-            health: Health::new(100),
-            reward: Reward(0),
-        }
-    }
-}
-
-#[autodefault]
 pub fn spawn_enemy_system(
     mut cmd: Commands,
     mut events: EventReader<SpawnEnemyEvent>,
@@ -59,7 +52,7 @@ pub fn spawn_enemy_system(
             let e = cmd.spawn().id();
             cmd.entity(e)
                 .insert_bundle(EnemyBundle {
-                    enemy: Enemy,
+                    enemy: Enemy(id.into()),
                     health: Health::new(prefab.health),
                     reward: Reward(prefab.reward),
                 })
@@ -67,12 +60,34 @@ pub fn spawn_enemy_system(
                     sprite: TextureAtlasSprite {
                         index: prefab.sprite_index,
                         color: prefab.sprite_color.into(),
+                        ..default()
                     },
                     texture_atlas: asset_sheet.0.clone(),
                     transform: Transform {
                         translation: spawn_pos.extend(0.),
+                        ..default()
                     },
+                    ..default()
                 });
+        }
+    }
+}
+
+pub fn despawn_enemy_system(
+    mut cmd: Commands,
+    query: Query<(Entity, &Enemy, &Health)>,
+    mut writer: EventWriter<DespawnEnemyEvent>,
+    prefab_lib: Res<PrefabLib<EnemyPrefab>>,
+) {
+    for (entity, Enemy(id), health) in query.iter() {
+        if health.is_zero() {
+            if let Some(prefab) = prefab_lib.get(id) {
+                writer.send(DespawnEnemyEvent {
+                    prefab: prefab.clone(),
+                    entity,
+                });
+                cmd.entity(entity).despawn();
+            }
         }
     }
 }

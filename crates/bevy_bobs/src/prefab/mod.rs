@@ -5,7 +5,9 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
-type PrefabMap<P> = HashMap<String, P>;
+pub type PrefabId = String;
+
+type PrefabMap<P> = HashMap<PrefabId, P>;
 
 pub struct PrefabLib<P: DeserializeOwned> {
     map: PrefabMap<P>,

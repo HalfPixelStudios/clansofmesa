@@ -28,6 +28,14 @@ impl Health {
     pub fn add(&mut self, amount: u32) {
         self.current_hp += amount;
     }
+
+    pub fn reset(&mut self) {
+        self.current_hp = self.original_hp;
+    }
+
+    pub fn is_zero(&self) -> bool {
+        self.current_hp == 0
+    }
 }
 
 impl Deref for Health {
