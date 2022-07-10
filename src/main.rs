@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 use bevy_ggrs::*;
-use clansofmesa::{app_state::*, assetloader::*, camera::*, input::*, networking::*, structure::*};
-
+use clansofmesa::{
+    app_state::*, assetloader::*, camera::*, input::*, map::*, networking::*, structure::*,
+};
 
 fn main() {
     let mut app = App::new();
