@@ -30,23 +30,22 @@ pub fn spawn_player(mut cmd: Commands) {
 
 pub fn player_move_system(
     time: Res<Time>,
-    input: Res<Vec<(InputPack, InputStatus)>>,
+    inputs: Res<Vec<(PressedPack, InputStatus)>>,
     mut query: Query<(&Player, &mut Transform, &Movement)>,
 ) {
     for (player, mut transform, movement) in query.iter_mut() {
-        // TODO error handle the unwrap
-        let (input_pack, _) = input.get(player.handle).unwrap();
+        let (pressed, _) = inputs[player.handle as usize];
 
         let mut move_dir = Vec2::ZERO;
 
-        if input_pack & INPUT_UP != 0 {
+        if pressed & INPUT_UP != 0 {
             move_dir += Vec2::Y;
-        } else if input_pack & INPUT_DOWN != 0 {
+        } else if pressed & INPUT_DOWN != 0 {
             move_dir -= Vec2::Y;
         }
-        if input_pack & INPUT_LEFT != 0 {
+        if pressed & INPUT_LEFT != 0 {
             move_dir -= Vec2::X;
-        } else if input_pack & INPUT_RIGHT != 0 {
+        } else if pressed & INPUT_RIGHT != 0 {
             move_dir += Vec2::X;
         }
 

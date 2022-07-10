@@ -1,16 +1,19 @@
 use bevy::{prelude::*, tasks::IoTaskPool};
 use bevy_ggrs::*;
+use ggrs::PlayerType;
 use matchbox_socket::WebRtcSocket;
 
-use crate::input::GGRSInput;
+use crate::input::PressedPack;
 
 pub struct GGRSConfig;
 
 impl ggrs::Config for GGRSConfig {
-    type Input = GGRSInput;
+    type Input = PressedPack;
     type State = u8;
     type Address = String;
 }
+
+struct LocalPlayerHandle(usize);
 
 pub struct NetworkingPlugin;
 
@@ -55,6 +58,9 @@ fn lobby(mut cmd: Commands, mut socket: ResMut<Option<WebRtcSocket>>) {
         .with_input_delay(2);
 
     for (i, player) in players.into_iter().enumerate() {
+        if player == PlayerType::Local {
+            cmd.insert_resource(LocalPlayerHandle(i));
+        }
         session_builder = session_builder
             .add_player(player, i)
             .expect("failed to add player");
