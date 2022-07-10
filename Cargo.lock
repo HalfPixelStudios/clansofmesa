@@ -1396,12 +1396,14 @@ dependencies = [
  "argparse",
  "autodefault",
  "bevy",
+ "bevy_bobs",
  "bevy_ecs_ldtk",
  "bevy_ggrs",
  "bytemuck",
  "ggrs",
  "matchbox_socket",
  "rand",
+ "serde",
 ]
 
 [[package]]
