@@ -1,3 +1,5 @@
+use bevy::prelude::*;
+
 pub struct Displacement {
     prev_pos: Option<Vec3>,
     total_distance: f32,
