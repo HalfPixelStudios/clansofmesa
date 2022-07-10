@@ -10,3 +10,4 @@ repository = "https://github.com/HalfPixelStudios/clansofmesa"
 
 [dependencies]
 bevy = { version = "0.7" }
+rand = { version = "0.8.5" }
