@@ -1,9 +1,11 @@
 use bevy::prelude::*;
 use std::time::Duration;
 
-use crate::misc::displacement::*;
+#[cfg(feature = "egui")]
+use bevy_inspector_egui::{egui::Ui, Context, Inspectable};
 
 use super::health::Health;
+use crate::misc::displacement::*;
 
 pub trait Lifetime {
     fn is_expired(&self) -> bool;
@@ -14,13 +16,11 @@ pub trait Lifetime {
 pub struct DistanceLifetime {
     max_distance: f32,
     displacement: Displacement,
-    expired: bool,
 }
 
 #[derive(Component)]
 pub struct DurationLifetime {
     timer: Timer,
-    expired: bool,
 }
 
 #[derive(Component)]
@@ -33,17 +33,27 @@ impl DistanceLifetime {
         DistanceLifetime {
             max_distance,
             displacement: Displacement::new(),
-            expired: false,
         }
     }
 }
 
 impl Lifetime for DistanceLifetime {
     fn is_expired(&self) -> bool {
-        self.expired
+        self.displacement.get_distance() > self.max_distance
     }
     fn reset(&mut self) {
-        self.expired = false;
+        self.displacement.reset();
+    }
+}
+
+// TODO unfortunately we cannot write a blanket implementation for all structs that implement Lifetime (due to E0210)
+#[cfg(feature = "egui")]
+impl Inspectable for DistanceLifetime {
+    type Attributes = ();
+
+    fn ui(&mut self, _ui: &mut Ui, _options: Self::Attributes, _context: &mut Context) -> bool {
+        println!("{}", self.is_expired());
+        false
     }
 }
 
@@ -51,17 +61,26 @@ impl DurationLifetime {
     pub fn new(max_duration: f32) -> Self {
         DurationLifetime {
             timer: Timer::new(Duration::from_millis((max_duration * 1000.) as u64), false),
-            expired: false,
         }
     }
 }
 
 impl Lifetime for DurationLifetime {
     fn is_expired(&self) -> bool {
-        self.expired
+        self.timer.finished()
     }
     fn reset(&mut self) {
-        self.expired = false;
+        self.timer.reset();
+    }
+}
+
+#[cfg(feature = "egui")]
+impl Inspectable for DurationLifetime {
+    type Attributes = ();
+
+    fn ui(&mut self, _ui: &mut Ui, _options: Self::Attributes, _context: &mut Context) -> bool {
+        println!("{}", self.is_expired());
+        false
     }
 }
 
@@ -76,6 +95,16 @@ impl PenetrationLifetime {
     }
 }
 
+#[cfg(feature = "egui")]
+impl Inspectable for PenetrationLifetime {
+    type Attributes = ();
+
+    fn ui(&mut self, _ui: &mut Ui, _options: Self::Attributes, _context: &mut Context) -> bool {
+        println!("{}", self.is_expired());
+        false
+    }
+}
+
 impl Lifetime for PenetrationLifetime {
     fn is_expired(&self) -> bool {
         self.health.is_zero()
@@ -87,28 +116,12 @@ impl Lifetime for PenetrationLifetime {
 
 pub fn duration_lifetime_system(time: Res<Time>, mut query: Query<&mut DurationLifetime>) {
     for mut lifetime in query.iter_mut() {
-        if lifetime.expired {
-            continue;
-        }
-
         lifetime.timer.tick(time.delta());
-
-        if lifetime.timer.finished() {
-            lifetime.expired = true;
-        }
     }
 }
 
 pub fn distance_lifetime_system(mut query: Query<(&Transform, &mut DistanceLifetime)>) {
     for (transform, mut lifetime) in query.iter_mut() {
-        if lifetime.expired {
-            continue;
-        }
-
-        if lifetime.displacement.get_distance() > lifetime.max_distance {
-            lifetime.expired = true;
-        }
-
         lifetime.displacement.update(transform.translation);
     }
 }
