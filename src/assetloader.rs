@@ -9,7 +9,7 @@ pub struct AssetLoadPlugin;
 
 impl Plugin for AssetLoadPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(load_assets);
+        app.add_startup_system_to_stage(StartupStage::PreStartup, load_assets);
     }
 }
 
@@ -23,8 +23,8 @@ pub fn load_assets(
     let atlas = TextureAtlas::from_grid_with_padding(
         image,
         Vec2::new(16.0, 16.0),
-        ATLAS_WIDTH,
-        ATLAS_HEIGHT,
+        12,
+        10,
         Vec2::splat(1.0),
     );
     let atlas_handle = texture_atlases.add(atlas);
