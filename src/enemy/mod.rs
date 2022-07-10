@@ -10,6 +10,18 @@ use bevy_bobs::{
 use self::prefab::*;
 use crate::assetloader::*;
 
+// temp define ron in string
+const RON_STRING: &str = r#"
+{
+    "testing_enemy": (
+        health: 100,
+        reward: 20,
+        sprite_index: 1,
+        sprite_color: ColorRGB ( r: 1.0, g: 1.0, b: 1.0 ),
+    )
+}
+"#;
+
 pub struct SpawnEnemyEvent {
     pub id: PrefabId,
     pub spawn_pos: Vec2,
@@ -33,6 +45,26 @@ pub struct EnemyBundle {
     pub reward: Reward,
     #[bundle]
     pub sprite_sheet: SpriteSheetBundle,
+}
+
+pub struct EnemyPlugin;
+
+impl Plugin for EnemyPlugin {
+    fn build(&self, app: &mut App) {
+        app.insert_resource(PrefabLib::<EnemyPrefab>::new(RON_STRING))
+            .add_event::<SpawnEnemyEvent>()
+            .add_event::<DespawnEnemyEvent>()
+            .add_startup_system(setup)
+            .add_system(spawn_enemy_system)
+            .add_system(despawn_enemy_system);
+    }
+}
+
+fn setup(mut writer: EventWriter<SpawnEnemyEvent>) {
+    writer.send(SpawnEnemyEvent {
+        id: "testing_enemy".into(),
+        spawn_pos: Vec2::ZERO,
+    })
 }
 
 pub fn spawn_enemy_system(

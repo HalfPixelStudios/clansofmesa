@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 use bevy_ggrs::*;
 use clansofmesa::{
-    app_state::*, assetloader::*, camera::*, input::*, map::*, networking::*, structure::*,
+    app_state::*, assetloader::*, camera::*, enemy::EnemyPlugin, input::*, map::*, networking::*,
+    structure::*,
 };
 
 fn main() {
@@ -9,7 +10,6 @@ fn main() {
 
     // networked systems
     GGRSPlugin::<GGRSConfig>::new()
-        .with_input_system(input_system)
         .with_input_system(input_system)
         .with_rollback_schedule(Schedule::default().with_stage(
             "ROLLBACK_STAGE",
@@ -29,6 +29,7 @@ fn main() {
         .add_plugin(NetworkingPlugin)
         .add_plugin(CameraPlugin)
         .add_plugin(AssetLoadPlugin)
+        .add_plugin(EnemyPlugin)
         .add_plugin(StructurePlugin);
     //.add_startup_system(spawn_player);
 
