@@ -1,0 +1,13 @@
+[package]
+name = "bevy_bobs"
+version = "0.1.0"
+edition = "2021"
+authors = ["nithinmuthukumar", "MrPicklePinosaur"]
+description = "Collection of common utility components"
+repository = "https://github.com/HalfPixelStudios/clansofmesa"
+
+[lib]
+
+[dependencies]
+bevy = { version = "0.7" }
+rand = { version = "0.8.5" }

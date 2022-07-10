@@ -39,6 +39,7 @@ matchbox_socket = { git = "https://github.com/johanhelsing/matchbox", branch = "
 
 [workspace]
 resolver = "2"
+members = ["crates/*"]
 
 [profile.dev]
 opt-level = 1
