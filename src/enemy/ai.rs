@@ -2,21 +2,39 @@ use bevy::prelude::*;
 
 // dumb ai that attempts to move to target in straight line
 #[derive(Component)]
-pub struct DumbAI {
+pub struct DumbMoveAI {
     speed: f32,
     target: Option<Vec2>,
 }
 
 // ai with flocking behavior
-#[derive(Component, Clone)]
-pub struct BoidAI {
+#[derive(Component, Default, Clone)]
+pub struct BoidMoveAI {
     pub speed: f32,
     pub view_angle: f32,
     pub view_range: f32,
     pub coherence: f32,
     pub steering: f32,
     pub alignment: f32,
-    heading: Vec2, // direction currently travelling in
+    pub chaos: u32, // randomness (lower is more random)
+
+    // these really should not be public
+    pub heading: Vec2,        // direction currently travelling in
+    pub target: Option<Vec2>, // optional target to move towards
+}
+
+pub enum AttackPreference {
+    Strongest,
+    Weakest,
+    Furthest,
+    Closest,
+    Random,
+}
+
+#[derive(Component)]
+pub struct RangeAttackAI {
+    pub attack_range: f32, // min distance from target at which will begin to attack
+    pub preference: AttackPreference,
 }
 
 pub struct AIPlugin;
@@ -27,9 +45,9 @@ impl Plugin for AIPlugin {
     }
 }
 
-impl DumbAI {
+impl DumbMoveAI {
     pub fn new(speed: f32) -> Self {
-        DumbAI {
+        DumbMoveAI {
             speed,
             target: None,
         }
@@ -42,7 +60,7 @@ impl DumbAI {
     }
 }
 
-pub fn dumb_ai_system(time: Res<Time>, mut query: Query<(&mut Transform, &DumbAI)>) {
+pub fn dumb_ai_system(time: Res<Time>, mut query: Query<(&mut Transform, &DumbMoveAI)>) {
     for (mut trans, ai) in query.iter_mut() {
         if ai.target.is_none() {
             continue;
@@ -55,13 +73,11 @@ pub fn dumb_ai_system(time: Res<Time>, mut query: Query<(&mut Transform, &DumbAI
     }
 }
 
-pub fn boid_ai_system(mut query: Query<(Entity, &mut Transform, &BoidAI)>) {
-
-    /*
+pub fn boid_ai_system(time: Res<Time>, mut query: Query<(Entity, &mut Transform, &BoidMoveAI)>) {
+    let mut heading_updates: Vec<(Entity, Vec2)> = vec![];
     for (self_entity, self_trans, self_ai) in query.iter() {
-
         // fetch all boids in viewing range
-        let mut neighbours: Vec<(Transform, BoidAI)> = vec!();
+        let mut neighbours: Vec<(Transform, BoidMoveAI)> = vec![];
         for (other_entity, other_trans, other_ai) in query.iter() {
             if self_entity == other_entity {
                 continue;
@@ -72,10 +88,26 @@ pub fn boid_ai_system(mut query: Query<(Entity, &mut Transform, &BoidAI)>) {
         }
 
         // alignment (attempt to face same direction as neighbours)
-        if let Some(avg_heading) = neighbours.iter().fold(Vec2::ZERO, |acc, b| acc + b.1.heading).try_normalize() {
+        if let Some(avg_heading) = neighbours
+            .iter()
+            .fold(Vec2::ZERO, |acc, b| acc + b.1.heading)
+            .try_normalize()
+        {
             // self_ai.heading
         }
 
+        // cohesion
+        if let Some(avg_position) = neighbours
+            .iter()
+            .fold(Vec3::ZERO, |acc, b| acc + b.0.translation)
+            .try_normalize()
+        {}
+
+        // target
     }
-    */
+
+    // move
+    for (_, mut transform, ai) in query.iter_mut() {
+        transform.translation += ai.speed * ai.heading.extend(0.) * time.delta_seconds();
+    }
 }
