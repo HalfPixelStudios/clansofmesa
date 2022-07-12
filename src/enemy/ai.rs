@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_bobs::physics_2d::*;
 
 // dumb ai that attempts to move to target in straight line
 #[derive(Component)]
@@ -16,10 +17,7 @@ pub struct BoidMoveAI {
     pub coherence: f32,
     pub steering: f32,
     pub alignment: f32,
-    pub chaos: u32, // randomness (lower is more random)
-
-    // these really should not be public
-    pub heading: Vec2,        // direction currently travelling in
+    pub chaos: u32,           // randomness (lower is more random)
     pub target: Option<Vec2>, // optional target to move towards
 }
 
@@ -73,12 +71,15 @@ pub fn dumb_ai_system(time: Res<Time>, mut query: Query<(&mut Transform, &DumbMo
     }
 }
 
-pub fn boid_ai_system(time: Res<Time>, mut query: Query<(Entity, &mut Transform, &BoidMoveAI)>) {
+pub fn boid_ai_system(
+    time: Res<Time>,
+    mut query: Query<(Entity, &mut Transform, &BoidMoveAI, &RigidBody)>,
+) {
     let mut heading_updates: Vec<(Entity, Vec2)> = vec![];
-    for (self_entity, self_trans, self_ai) in query.iter() {
+    for (self_entity, self_trans, self_ai, self_rb) in query.iter() {
         // fetch all boids in viewing range
         let mut neighbours: Vec<(Transform, BoidMoveAI)> = vec![];
-        for (other_entity, other_trans, other_ai) in query.iter() {
+        for (other_entity, other_trans, other_ai, other_rb) in query.iter() {
             if self_entity == other_entity {
                 continue;
             }
