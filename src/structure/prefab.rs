@@ -19,6 +19,7 @@ pub struct SimpleAttackAI {
     pub bullet_id: PrefabId,
     pub preference: AttackPreference,
     pub attack_range: f32,
+    pub attack_speed: f32,
     pub attack_pattern: AttackPattern,
 }
 

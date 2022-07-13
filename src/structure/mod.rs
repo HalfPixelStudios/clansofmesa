@@ -28,6 +28,7 @@ const RON_STRING: &str = r#"
             bullet_id: "archer_bullet",
             preference: Closest,
             attack_range: 100.0,
+            attack_speed: 0.5,
             attack_pattern: Straight,
         ),
         health: 100,

@@ -17,6 +17,7 @@ pub struct AttackAI {
     pub bullet_id: PrefabId,
     pub preference: AttackPreference,
     pub attack_range: f32,
+    pub attack_speed: f32,
     pub attack_pattern: AttackPattern,
     attack_timer: Stopwatch,
 }
@@ -27,12 +28,14 @@ impl From<SimpleAttackAI> for AttackAI {
             bullet_id,
             preference,
             attack_range,
+            attack_speed,
             attack_pattern,
         } = ai;
         AttackAI {
             bullet_id,
             preference,
             attack_range,
+            attack_speed,
             attack_pattern,
             attack_timer: Stopwatch::new(),
         }
@@ -40,11 +43,19 @@ impl From<SimpleAttackAI> for AttackAI {
 }
 
 pub fn attack_system(
-    tower_query: Query<(&AttackAI, &Transform), With<Tower>>,
+    time: Res<Time>,
+    mut tower_query: Query<(&mut AttackAI, &Transform), With<Tower>>,
     enemy_query: Query<(Entity, &Transform, &Health), With<Enemy>>,
     mut writer: EventWriter<SpawnBulletEvent>,
 ) {
-    for (ai, trans) in tower_query.iter() {
+    for (mut ai, trans) in tower_query.iter_mut() {
+        ai.attack_timer.tick(time.delta());
+
+        if ai.attack_timer.elapsed_secs() < ai.attack_speed {
+            continue;
+        }
+        ai.attack_timer.reset();
+
         let visible_enemies = enemy_query.iter().filter(|(_, enemy_trans, _)| {
             trans.translation.distance(enemy_trans.translation) < ai.attack_range
         });
