@@ -13,7 +13,10 @@ use self::{
     ai::{AIPlugin, BoidMoveAI, DumbMoveAI},
     prefab::*,
 };
-use crate::assetloader::*;
+use crate::{
+    assetloader::*,
+    layers::{LayerName, Layers},
+};
 
 // temp define ron in string
 const RON_STRING: &str = r#"
@@ -79,13 +82,14 @@ impl Plugin for EnemyPlugin {
             .insert_resource(PrefabLib::<EnemyPrefab>::new(RON_STRING))
             .add_event::<SpawnEnemyEvent>()
             .add_event::<DespawnEnemyEvent>()
-            // .add_startup_system(setup)
+            .add_startup_system(setup)
             .add_system(spawn_enemy_system)
             .add_system(despawn_enemy_system);
     }
 }
 
 fn setup(mut writer: EventWriter<SpawnEnemyEvent>) {
+    /*
     use rand::{thread_rng, Rng};
 
     for _ in 1..=40 {
@@ -99,6 +103,11 @@ fn setup(mut writer: EventWriter<SpawnEnemyEvent>) {
             spawn_pos,
         });
     }
+    */
+    writer.send(SpawnEnemyEvent {
+        id: "nithin".into(),
+        spawn_pos: Vec2::new(50., 50.),
+    });
 }
 
 fn spawn_enemy_system(
@@ -107,6 +116,7 @@ fn spawn_enemy_system(
     prefab_lib: Res<PrefabLib<EnemyPrefab>>,
     asset_sheet: Res<AssetSheet>,
     mut rip: ResMut<RollbackIdProvider>,
+    layers: Res<Layers>,
 ) {
     for SpawnEnemyEvent { id, spawn_pos } in events.iter() {
         if let Some(prefab) = prefab_lib.get(id) {
@@ -123,7 +133,7 @@ fn spawn_enemy_system(
                     },
                     texture_atlas: asset_sheet.0.clone(),
                     transform: Transform {
-                        translation: spawn_pos.extend(0.),
+                        translation: spawn_pos.extend(layers.get(LayerName::Enemy).z_height),
                         ..default()
                     },
                     ..default()

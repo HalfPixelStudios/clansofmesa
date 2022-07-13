@@ -5,7 +5,8 @@ pub struct Layers(HashMap<LayerName, LayerData>);
 impl Layers {
     pub fn new() -> Self {
         Layers(HashMap::from([
-            (LayerName::Ground, LayerData { z_height: 0. }),
+            (LayerName::Ground, LayerData { z_height: -1. }),
+            (LayerName::Enemy, LayerData { z_height: 50. }),
             (LayerName::Tower, LayerData { z_height: 100. }),
         ]))
     }
@@ -17,6 +18,7 @@ impl Layers {
 #[derive(Eq, PartialEq, Hash)]
 pub enum LayerName {
     Ground,
+    Enemy,
     Tower,
 }
 

@@ -10,8 +10,8 @@ use bevy_bobs::{
 use bevy_ggrs::{Rollback, RollbackIdProvider};
 
 use self::{
-    ai::AttackAI,
-    prefab::{AttackPreference, TowerPrefab},
+    ai::{attack_system, AttackAI},
+    prefab::{AttackPreference, SimpleAttackAI, TowerPrefab},
 };
 use crate::{
     assetloader::*,
@@ -24,6 +24,12 @@ const RON_STRING: &str = r#"
         cost: 100,
         sprite_index: 0,
         sprite_color: ColorRGB ( r: 1.0, g: 1.0, b: 1.0 ),
+        ai: SimpleAttackAI (
+            bullet_id: "archer_bullet",
+            preference: Closest,
+            attack_range: 100.0,
+            attack_pattern: Straight,
+        ),
         health: 100,
     )
 }
@@ -44,6 +50,7 @@ impl Plugin for StructurePlugin {
             .add_startup_system(setup)
             .add_system(spawn_structure_system)
             .add_system(despawn_structure_system)
+            .add_system(attack_system)
             .insert_resource(PrefabLib::<TowerPrefab>::new(RON_STRING));
     }
 }
@@ -80,12 +87,7 @@ fn spawn_structure_system(
             })
             .insert(Tower(id.into()))
             .insert(Health::new(prefab.health))
-            .insert(AttackAI {
-                bullet_id: "archer_bullet".into(),
-                preference: AttackPreference::Closest,
-                attack_range: 400.,
-                attack_pattern: AttackPattern::Straight,
-            })
+            .insert(AttackAI::from((&prefab.ai).clone()))
             .insert(Rollback::new(rip.next_id()));
         }
     }

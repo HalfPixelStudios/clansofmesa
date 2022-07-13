@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{core::Stopwatch, prelude::*};
 use bevy_bobs::{
     attack_pattern::{self, *},
     component::health::Health,
@@ -7,14 +7,36 @@ use bevy_bobs::{
 
 use crate::{bullet::SpawnBulletEvent, enemy::Enemy};
 
-use super::{prefab::AttackPreference, Tower};
+use super::{
+    prefab::{AttackPreference, SimpleAttackAI},
+    Tower,
+};
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct AttackAI {
     pub bullet_id: PrefabId,
     pub preference: AttackPreference,
     pub attack_range: f32,
     pub attack_pattern: AttackPattern,
+    attack_timer: Stopwatch,
+}
+
+impl From<SimpleAttackAI> for AttackAI {
+    fn from(ai: SimpleAttackAI) -> Self {
+        let SimpleAttackAI {
+            bullet_id,
+            preference,
+            attack_range,
+            attack_pattern,
+        } = ai;
+        AttackAI {
+            bullet_id,
+            preference,
+            attack_range,
+            attack_pattern,
+            attack_timer: Stopwatch::new(),
+        }
+    }
 }
 
 pub fn attack_system(
