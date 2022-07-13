@@ -24,7 +24,7 @@ pub fn place_structure(
         }
     }
 
-    if (input.pressed & PLACE != 0) && can_build {
+    if (input.just_pressed & PLACE != 0) && can_build {
         spawn_event.send(SpawnStructureEvent {
             id: "archer_tower".into(),
             spawn_pos: Vec2::new(input.grid_x as f32 - 8., input.grid_y as f32 - 8.),
