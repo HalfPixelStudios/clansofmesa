@@ -2,12 +2,13 @@ use bevy::prelude::*;
 
 pub struct WorldGravity(pub Vec2);
 
-#[derive(Component)]
-pub struct RigidBody2D {
+#[derive(Component, Clone, Default)]
+pub struct RigidBody {
     pub mass: f32,
     pub gravity_scale: Option<Vec2>, // override the world's gravity
     pub linear_damping: f32,
     pub velocity: Vec2,
+    pub max_velocity: Option<f32>,
     pub force: Vec2,
 }
 
@@ -16,28 +17,34 @@ pub struct PhysicsPlugin;
 impl Plugin for PhysicsPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(WorldGravity(Vec2::ZERO))
-            .add_system(physics_2d_system)
-            .add_system_to_stage(CoreStage::Last, physics_2d_reset_force_system);
+            .add_system(velocity_system)
+            .add_system(apply_force_system);
     }
 }
 
-pub fn physics_2d_system(time: Res<Time>, mut query: Query<&mut RigidBody2D>) {
+pub fn apply_force_system(world_gravity: Res<WorldGravity>, mut query: Query<&mut RigidBody>) {
     for mut rb in query.iter_mut() {
         let force = rb.force;
         let mass = rb.mass;
-        rb.velocity += force / mass * time.delta_seconds();
-    }
-}
+        rb.velocity += force / mass;
 
-fn physics_2d_reset_force_system(
-    world_gravity: Res<WorldGravity>,
-    mut query: Query<&mut RigidBody2D>,
-) {
-    for mut rb in query.iter_mut() {
+        // clamp max velocity
+        let max_velocity = rb.max_velocity;
+        if let Some(max_velocity) = max_velocity {
+            rb.velocity = rb.velocity.clamp_length_max(max_velocity);
+        }
+
+        // reset force
         rb.force = if let Some(grav_override) = rb.gravity_scale {
             grav_override
         } else {
             world_gravity.0
         }
+    }
+}
+
+pub fn velocity_system(time: Res<Time>, mut query: Query<(&mut Transform, &RigidBody)>) {
+    for (mut trans, rb) in query.iter_mut() {
+        trans.translation += rb.velocity.extend(0.) * time.delta_seconds();
     }
 }
