@@ -14,6 +14,7 @@ use clansofmesa::{
     layers::Layers,
     map::*,
     networking::*,
+    player::place::*,
     structure::*,
     ui::UIPlugin,
 };
@@ -36,7 +37,9 @@ fn main() {
                 SystemStage::parallel()
                     .with_system(change_mode)
                     .with_system(dumb_ai_system)
-                    .with_system(boid_ai_system),
+                    .with_system(boid_ai_system)
+                    .with_system(place_structure)
+                    .with_system(place_enemy),
             ),
         )
         .register_rollback_type::<Transform>()
@@ -56,8 +59,8 @@ fn main() {
         .add_plugin(AssetLoadPlugin)
         .add_plugin(StructurePlugin)
         .add_plugin(UIPlugin)
-        .add_plugin(GamePlugin);
-    // .add_plugin(EnemyPlugin);
+        .add_plugin(GamePlugin)
+        .add_plugin(EnemyPlugin);
     //.add_startup_system(spawn_player);
 
     app.insert_resource(Layers::new());

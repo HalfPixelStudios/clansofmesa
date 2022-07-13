@@ -116,6 +116,9 @@ pub fn tick_round(time: Res<Time>, mut game_data: ResMut<GameData>) {
     game_data.round_timer.tick(time.delta());
     if game_data.round_timer.just_finished() {
         game_data.round += 1;
+        let b = game_data.attacker;
+        game_data.attacker = game_data.defender;
+        game_data.defender = b;
     }
 }
 pub fn change_mode(
@@ -124,7 +127,6 @@ pub fn change_mode(
     game_data: ResMut<GameData>,
 ) {
     let (input, _) = inputs[player.id];
-    info!("{:?}", input.pressed);
     if (input.pressed & ACTION != 0) {
         if game_data.attacker == player.id {
             player.mode = Mode::Deploying;
