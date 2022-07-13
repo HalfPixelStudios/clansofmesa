@@ -134,6 +134,7 @@ fn spawn_enemy_system(
                         .insert(RigidBody {
                             mass: 1.,
                             velocity: Mat2::from_angle(angle) * Vec2::X,
+                            max_velocity: Some(100.),
                             ..default()
                         });
                 }

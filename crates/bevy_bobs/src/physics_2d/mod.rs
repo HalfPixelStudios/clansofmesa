@@ -8,6 +8,7 @@ pub struct RigidBody {
     pub gravity_scale: Option<Vec2>, // override the world's gravity
     pub linear_damping: f32,
     pub velocity: Vec2,
+    pub max_velocity: Option<f32>,
     pub force: Vec2,
 }
 
@@ -17,31 +18,34 @@ impl Plugin for PhysicsPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(WorldGravity(Vec2::ZERO))
             .add_system(velocity_system)
-            .add_system(apply_force_system)
-            .add_system_to_stage(CoreStage::Last, reset_force_system);
+            .add_system(apply_force_system);
     }
 }
 
-pub fn apply_force_system(mut query: Query<&mut RigidBody>) {
+pub fn apply_force_system(world_gravity: Res<WorldGravity>, mut query: Query<&mut RigidBody>) {
     for mut rb in query.iter_mut() {
         let force = rb.force;
+        println!("rb force {}", force);
         let mass = rb.mass;
         rb.velocity += force / mass;
+
+        // clamp max velocity
+        let max_velocity = rb.max_velocity;
+        if let Some(max_velocity) = max_velocity {
+            rb.velocity = rb.velocity.clamp_length_max(max_velocity);
+        }
+
+        // reset force
+        rb.force = if let Some(grav_override) = rb.gravity_scale {
+            grav_override
+        } else {
+            world_gravity.0
+        }
     }
 }
 
 pub fn velocity_system(time: Res<Time>, mut query: Query<(&mut Transform, &RigidBody)>) {
     for (mut trans, rb) in query.iter_mut() {
         trans.translation += rb.velocity.extend(0.) * time.delta_seconds();
-    }
-}
-
-fn reset_force_system(world_gravity: Res<WorldGravity>, mut query: Query<&mut RigidBody>) {
-    for mut rb in query.iter_mut() {
-        rb.force = if let Some(grav_override) = rb.gravity_scale {
-            grav_override
-        } else {
-            world_gravity.0
-        }
     }
 }

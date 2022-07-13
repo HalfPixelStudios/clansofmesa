@@ -74,7 +74,7 @@ pub fn dumb_ai_system(time: Res<Time>, mut query: Query<(&mut Transform, &DumbMo
     }
 }
 
-pub fn boid_ai_system(mut query: Query<(Entity, &mut Transform, &BoidMoveAI, &RigidBody)>) {
+pub fn boid_ai_system(mut query: Query<(Entity, &mut Transform, &BoidMoveAI, &mut RigidBody)>) {
     let mut force_updates: HashMap<Entity, Vec2> = HashMap::new();
     for (self_entity, self_trans, self_ai, self_rb) in query.iter() {
         // fetch all boids in viewing range
@@ -112,14 +112,10 @@ pub fn boid_ai_system(mut query: Query<(Entity, &mut Transform, &BoidMoveAI, &Ri
     }
 
     // update all the forces
-    for (e, force) in force_updates.iter() {
-        println!(
-            "is ok {}",
-            query.get_component_mut::<BoidMoveAI>(e.clone()).is_ok()
-        );
-        // if let Ok(rb) = query.get_component_mut::<RigidBody>(e.clone()) {
-        //     println!("ok");
-        //     // rb.force += *force * 500.;
-        // }
+
+    for (e, _, ai, mut rb) in query.iter_mut() {
+        if let Some(force) = force_updates.get(&e) {
+            rb.force += *force * 5.;
+        }
     }
 }
