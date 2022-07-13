@@ -5,9 +5,11 @@ use clansofmesa::{
     app_state::*,
     assetloader::*,
     camera::*,
-    enemy::{ai::{dumb_ai_system, boid_ai_system}, EnemyPlugin},
+    enemy::{
+        ai::{boid_ai_system, dumb_ai_system},
+        EnemyPlugin,
+    },
     game::*,
-
     input::*,
     map::*,
     networking::*,
@@ -31,12 +33,9 @@ fn main() {
                 "ROLLBACK_STAGE",
                 SystemStage::parallel()
                     .with_system(place_structure) // .with_system_set(SystemSet::on_update(AppState::InGame).with_system(player_move_system))
-
                     .with_system(change_mode)
-                    .with_system(dumb_ai_system),
-
+                    .with_system(dumb_ai_system)
                     .with_system(boid_ai_system),
-
             ),
         )
         .register_rollback_type::<Transform>()
