@@ -27,14 +27,7 @@ pub fn input_system(
     player: Res<LocalPlayerHandle>,
     game_data: Res<GameData>,
 ) -> NetInput {
-    let mut action: bool;
-    if (game_data.attacker == player.id && player.mode == Mode::Deploying)
-        || (game_data.defender == player.id && player.mode == Mode::Building)
-    {
-        action = true;
-    } else {
-        action = false;
-    }
+    let mut action = check_action(player, game_data);
 
     let mut pressed = PressedPack::default();
 

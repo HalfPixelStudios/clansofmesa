@@ -53,6 +53,18 @@ pub fn run_if_defender(
         None => ShouldRun::No,
     }
 }
+pub fn run_if_camera(player: Option<Res<LocalPlayerHandle>>) -> ShouldRun {
+    match player {
+        Some(p) => {
+            if p.mode == Mode::Camera {
+                ShouldRun::Yes
+            } else {
+                ShouldRun::No
+            }
+        }
+        None => ShouldRun::No,
+    }
+}
 pub fn run_if_attacker(
     player: Option<Res<LocalPlayerHandle>>,
     game_data: Res<GameData>,
@@ -74,15 +86,22 @@ pub fn run_if_action(
 ) -> ShouldRun {
     match player {
         Some(p) => {
-            if (game_data.attacker == p.id && p.mode == Mode::Deploying)
-                || (game_data.defender == p.id && p.mode == Mode::Building)
-            {
+            if check_action(p, game_data) {
                 ShouldRun::Yes
             } else {
                 ShouldRun::No
             }
         }
         None => ShouldRun::No,
+    }
+}
+pub fn check_action(player: Res<LocalPlayerHandle>, game_data: Res<GameData>) -> bool {
+    if (game_data.attacker == player.id && player.mode == Mode::Deploying)
+        || (game_data.defender == player.id && player.mode == Mode::Building)
+    {
+        true
+    } else {
+        false
     }
 }
 pub struct GamePlugin;
