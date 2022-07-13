@@ -45,7 +45,6 @@ fn lobby(mut cmd: Commands, mut socket: ResMut<Option<WebRtcSocket>>) {
     let players = socket.as_ref().unwrap().players();
 
     let num_players = 2;
-    info!("{:?}", players.len());
     if players.len() < num_players {
         return; // wait for more players
     }
