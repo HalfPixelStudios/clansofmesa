@@ -1,7 +1,11 @@
 use bevy::prelude::*;
 
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 pub struct WorldGravity(pub Vec2);
 
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Component, Clone, Default)]
 pub struct RigidBody {
     pub mass: f32,
