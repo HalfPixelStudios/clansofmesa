@@ -4,7 +4,7 @@ use serde::Deserialize;
 #[derive(Deserialize, Clone)]
 pub enum AI {
     Dumb { speed: f32 },
-    Boid { speed: f32 },
+    Boid { speed: f32, view_range: f32 },
 }
 
 #[derive(Deserialize, Clone)]

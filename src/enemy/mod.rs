@@ -1,9 +1,10 @@
 pub mod ai;
 pub mod prefab;
 
-use bevy::{math::Mat2, prelude::*};
+use bevy::{math::Mat2, prelude::*, render::view};
 use bevy_bobs::{
     component::health::Health,
+    physics_2d::RigidBody,
     prefab::{models::*, *},
 };
 use bevy_ggrs::{Rollback, RollbackIdProvider};
@@ -20,7 +21,7 @@ const RON_STRING: &str = r#"
     "testing_enemy": (
         health: 100,
         reward: 20,
-        ai: Boid ( speed: 20. ),
+        ai: Boid ( speed: 20., view_range: 100. ),
         sprite_index: 1,
         sprite_color: ColorRGB ( r: 1.0, g: 1.0, b: 1.0 ),
     )
@@ -115,7 +116,7 @@ fn spawn_enemy_system(
                 AI::Dumb { speed } => {
                     cmd.entity(e).insert(DumbMoveAI::new(speed));
                 }
-                AI::Boid { speed } => {
+                AI::Boid { speed, view_range } => {
                     // choose random direction to head to
                     use rand::{thread_rng, Rng};
                     use std::f32::consts::PI;
@@ -123,11 +124,18 @@ fn spawn_enemy_system(
                     let rand: i32 = thread_rng().gen_range(0..360);
                     let angle = (rand as f32) * PI / 180.;
 
-                    cmd.entity(e).insert(BoidMoveAI {
-                        speed,
-                        heading: Mat2::from_angle(angle) * Vec2::X,
-                        ..default()
-                    });
+                    cmd.entity(e)
+                        .insert(BoidMoveAI {
+                            speed,
+                            alignment: 1.0,
+                            view_range,
+                            ..default()
+                        })
+                        .insert(RigidBody {
+                            mass: 1.,
+                            velocity: Mat2::from_angle(angle) * Vec2::X,
+                            ..default()
+                        });
                 }
                 _ => {}
             };

@@ -1,5 +1,8 @@
 use bevy::prelude::*;
 use bevy_bobs::physics_2d::*;
+use std::collections::HashMap;
+
+use super::Enemy;
 
 // dumb ai that attempts to move to target in straight line
 #[derive(Component)]
@@ -71,44 +74,52 @@ pub fn dumb_ai_system(time: Res<Time>, mut query: Query<(&mut Transform, &DumbMo
     }
 }
 
-pub fn boid_ai_system(
-    time: Res<Time>,
-    mut query: Query<(Entity, &mut Transform, &BoidMoveAI, &RigidBody)>,
-) {
-    let mut heading_updates: Vec<(Entity, Vec2)> = vec![];
+pub fn boid_ai_system(mut query: Query<(Entity, &mut Transform, &BoidMoveAI, &RigidBody)>) {
+    let mut force_updates: HashMap<Entity, Vec2> = HashMap::new();
     for (self_entity, self_trans, self_ai, self_rb) in query.iter() {
         // fetch all boids in viewing range
-        let mut neighbours: Vec<(Transform, BoidMoveAI)> = vec![];
+        let mut neighbours: Vec<(Transform, BoidMoveAI, RigidBody)> = vec![];
         for (other_entity, other_trans, other_ai, other_rb) in query.iter() {
             if self_entity == other_entity {
                 continue;
             }
             if self_trans.translation.distance(other_trans.translation) < self_ai.view_range {
-                neighbours.push((other_trans.clone(), other_ai.clone()));
+                neighbours.push((other_trans.clone(), other_ai.clone(), other_rb.clone()));
             }
         }
 
         // alignment (attempt to face same direction as neighbours)
         if let Some(avg_heading) = neighbours
             .iter()
-            .fold(Vec2::ZERO, |acc, b| acc + b.1.heading)
+            .fold(Vec2::ZERO, |acc, (_, _, rb)| acc + rb.velocity)
             .try_normalize()
         {
-            // self_ai.heading
+            let cur_force = force_updates
+                .get(&self_entity)
+                .unwrap_or(&Vec2::ZERO)
+                .clone();
+            force_updates.insert(self_entity, avg_heading / self_ai.alignment + cur_force);
         }
 
         // cohesion
         if let Some(avg_position) = neighbours
             .iter()
-            .fold(Vec3::ZERO, |acc, b| acc + b.0.translation)
+            .fold(Vec3::ZERO, |acc, (trans, _, _)| acc + trans.translation)
             .try_normalize()
         {}
 
         // target
     }
 
-    // move
-    for (_, mut transform, ai) in query.iter_mut() {
-        transform.translation += ai.speed * ai.heading.extend(0.) * time.delta_seconds();
+    // update all the forces
+    for (e, force) in force_updates.iter() {
+        println!(
+            "is ok {}",
+            query.get_component_mut::<BoidMoveAI>(e.clone()).is_ok()
+        );
+        // if let Ok(rb) = query.get_component_mut::<RigidBody>(e.clone()) {
+        //     println!("ok");
+        //     // rb.force += *force * 500.;
+        // }
     }
 }
