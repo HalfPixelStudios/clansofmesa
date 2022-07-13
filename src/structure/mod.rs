@@ -1,20 +1,40 @@
-use super::assetloader::*;
-use super::game::*;
-use bevy_ecs_ldtk::prelude::*;
+pub mod ai;
+pub mod prefab;
 
-use super::camera::*;
-use super::input::*;
-use super::map::*;
 use bevy::prelude::*;
+use bevy_bobs::prefab::{PrefabId, PrefabLib};
+use bevy_ecs_ldtk::prelude::*;
 use bevy_ggrs::{Rollback, RollbackIdProvider};
 use ggrs::InputStatus;
+
+use self::prefab::TowerPrefab;
+use crate::{
+    assetloader::*,
+    camera::*,
+    game::*,
+    input::*,
+    layers::{LayerName, Layers},
+    map::*,
+};
+
+const RON_STRING: &str = r#"
+{
+    "archer_tower": (
+        cost: 100,
+        sprite_index: 0,
+        sprite_color: ColorRGB ( r: 1.0, g: 1.0, b: 1.0 ),
+    )
+}
+"#;
+
 #[derive(Component, Clone)]
 pub struct Tower;
 
 pub struct SpawnStructureEvent {
-    pub spawn_pos: Vec3,
-    pub index: usize,
+    pub id: PrefabId,
+    pub spawn_pos: Vec2,
 }
+
 #[derive(Component)]
 pub struct PlaceUI;
 
@@ -23,6 +43,7 @@ impl Plugin for StructurePlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<SpawnStructureEvent>()
             .add_system(spawn_structure)
+            .insert_resource(PrefabLib::<TowerPrefab>::new(RON_STRING))
             .add_startup_system(spawn_select_ui)
             .add_system_set(
                 SystemSet::new()
@@ -31,6 +52,7 @@ impl Plugin for StructurePlugin {
             );
     }
 }
+
 pub fn spawn_select_ui(mut cmd: Commands, assets: Res<AssetSheet>) {
     cmd.spawn_bundle(SpriteSheetBundle {
         sprite: TextureAtlasSprite {
@@ -45,27 +67,33 @@ pub fn spawn_select_ui(mut cmd: Commands, assets: Res<AssetSheet>) {
 
 pub fn spawn_structure(
     mut cmd: Commands,
-    assets: Res<AssetSheet>,
-    mut event: EventReader<SpawnStructureEvent>,
+    prefab_lib: Res<PrefabLib<TowerPrefab>>,
+    asset_sheet: Res<AssetSheet>,
+    mut events: EventReader<SpawnStructureEvent>,
     mut rip: ResMut<RollbackIdProvider>,
+    layers: Res<Layers>,
 ) {
-    for ev in event.iter() {
-        cmd.spawn_bundle(SpriteSheetBundle {
-            sprite: TextureAtlasSprite {
-                index: ev.index,
+    for SpawnStructureEvent { id, spawn_pos } in events.iter() {
+        if let Some(prefab) = prefab_lib.get(id) {
+            cmd.spawn_bundle(SpriteSheetBundle {
+                sprite: TextureAtlasSprite {
+                    index: prefab.sprite_index,
+                    color: prefab.sprite_color.into(),
+                    ..default()
+                },
+                texture_atlas: asset_sheet.0.clone(),
+                transform: Transform {
+                    translation: spawn_pos.extend(layers.get(LayerName::Tower).z_height),
+                    ..default()
+                },
                 ..default()
-            },
-            transform: Transform {
-                translation: ev.spawn_pos,
-                ..default()
-            },
-            texture_atlas: assets.0.clone(),
-            ..default()
-        })
-        .insert(Tower)
-        .insert(Rollback::new(rip.next_id()));
+            })
+            .insert(Tower)
+            .insert(Rollback::new(rip.next_id()));
+        }
     }
 }
+
 pub fn place_ui_controller(
     mut place_ui_query: Query<(&mut Transform, &mut TextureAtlasSprite), With<PlaceUI>>,
     mut intgrid_query: Query<(&mut IntGridCell, &GridCoords), Without<PlaceUI>>,
@@ -112,8 +140,8 @@ pub fn place_structure(
 
     if (input.pressed & PLACE != 0) && can_build {
         spawn_event.send(SpawnStructureEvent {
-            spawn_pos: Vec3::new(input.grid_x as f32 - 8., input.grid_y as f32 - 8., 100.),
-            index: 0,
+            id: "archer_tower".into(),
+            spawn_pos: Vec2::new(input.grid_x as f32 - 8., input.grid_y as f32 - 8.),
         });
         for (mut cell, coords) in intgrid_query.iter_mut() {
             if coords.x == ldtk_x && coords.y == ldtk_y {

@@ -25,18 +25,10 @@ pub struct BoidMoveAI {
     pub target: Option<Vec2>, // optional target to move towards
 }
 
-pub enum AttackPreference {
-    Strongest,
-    Weakest,
-    Furthest,
-    Closest,
-    Random,
-}
-
 #[derive(Component)]
 pub struct RangeAttackAI {
     pub attack_range: f32, // min distance from target at which will begin to attack
-    pub preference: AttackPreference,
+                           // pub preference: AttackPreference,
 }
 
 pub struct AIPlugin;

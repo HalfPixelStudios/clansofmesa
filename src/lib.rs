@@ -5,6 +5,7 @@ pub mod camera;
 pub mod enemy;
 pub mod game;
 pub mod input;
+pub mod layers;
 pub mod map;
 pub mod networking;
 pub mod structure;

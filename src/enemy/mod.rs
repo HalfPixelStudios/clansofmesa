@@ -152,7 +152,7 @@ fn spawn_enemy_system(
                             randomess,
                             wander_angle,
                             tracking,
-                            target: Some(Vec2::new(500., 500.)),
+                            ..default()
                         })
                         .insert(RigidBody {
                             mass: 1.,
