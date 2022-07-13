@@ -25,7 +25,6 @@ impl Plugin for PhysicsPlugin {
 pub fn apply_force_system(world_gravity: Res<WorldGravity>, mut query: Query<&mut RigidBody>) {
     for mut rb in query.iter_mut() {
         let force = rb.force;
-        println!("rb force {}", force);
         let mass = rb.mass;
         rb.velocity += force / mass;
 
