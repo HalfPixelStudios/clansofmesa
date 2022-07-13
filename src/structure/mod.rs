@@ -25,7 +25,7 @@ const RON_STRING: &str = r#"
 "#;
 
 #[derive(Component, Clone)]
-pub struct Tower;
+pub struct Tower(PrefabId);
 
 pub struct SpawnStructureEvent {
     pub id: PrefabId,
@@ -36,12 +36,13 @@ pub struct StructurePlugin;
 impl Plugin for StructurePlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<SpawnStructureEvent>()
-            .add_system(spawn_structure)
+            .add_system(spawn_structure_system)
+            .add_system(despawn_structure_system)
             .insert_resource(PrefabLib::<TowerPrefab>::new(RON_STRING));
     }
 }
 
-pub fn spawn_structure(
+pub fn spawn_structure_system(
     mut cmd: Commands,
     prefab_lib: Res<PrefabLib<TowerPrefab>>,
     asset_sheet: Res<AssetSheet>,
@@ -64,9 +65,17 @@ pub fn spawn_structure(
                 },
                 ..default()
             })
-            .insert(Tower)
+            .insert(Tower(id))
             .insert(Health::new(prefab.health))
             .insert(Rollback::new(rip.next_id()));
+        }
+    }
+}
+
+pub fn despawn_structure_system(mut cmd: Commands, query: Query<(Entity, &Tower, &Health)>) {
+    for (entity, Tower(id), health) in query.iter() {
+        if health.is_zero() {
+            cmd.entity(entity).despawn();
         }
     }
 }

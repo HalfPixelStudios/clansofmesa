@@ -16,7 +16,7 @@ pub fn attack_system(
     enemy_query: Query<(Entity, &Transform, &Health), With<Enemy>>,
 ) {
     for (ai, trans) in tower_query.iter() {
-        let target_entity: Option<(Entity, &Transform)> = match ai.preference {
+        let target: Option<(Entity, &Transform)> = match ai.preference {
             AttackPreference::Closest => enemy_query
                 .iter()
                 .min_by(|(_, x, _), (_, y, _)| {
@@ -43,5 +43,7 @@ pub fn attack_system(
                 .map(|(e, trans, _)| (e, trans)),
             _ => None,
         };
+
+        if let Some((target_entity, target_trans)) = target {}
     }
 }
