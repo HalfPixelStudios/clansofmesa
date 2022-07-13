@@ -1,3 +1,4 @@
+use super::game::*;
 use bevy::{prelude::*, tasks::IoTaskPool};
 use bevy_ggrs::*;
 use ggrs::PlayerType;
@@ -12,8 +13,6 @@ impl ggrs::Config for GGRSConfig {
     type State = u8;
     type Address = String;
 }
-
-struct LocalPlayerHandle(usize);
 
 pub struct NetworkingPlugin;
 
@@ -46,6 +45,7 @@ fn lobby(mut cmd: Commands, mut socket: ResMut<Option<WebRtcSocket>>) {
     let players = socket.as_ref().unwrap().players();
 
     let num_players = 2;
+    info!("{:?}", players.len());
     if players.len() < num_players {
         return; // wait for more players
     }
@@ -59,7 +59,10 @@ fn lobby(mut cmd: Commands, mut socket: ResMut<Option<WebRtcSocket>>) {
 
     for (i, player) in players.into_iter().enumerate() {
         if player == PlayerType::Local {
-            cmd.insert_resource(LocalPlayerHandle(i));
+            cmd.insert_resource(LocalPlayerHandle {
+                id: i,
+                mode: Mode::Building,
+            });
         }
         session_builder = session_builder
             .add_player(player, i)

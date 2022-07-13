@@ -1,8 +1,14 @@
 use bevy::prelude::*;
 use bevy_ggrs::*;
 use clansofmesa::{
-    app_state::*, assetloader::*, camera::*, input::*, map::*, networking::*, structure::*,
+    app_state::*, assetloader::*, camera::*, game::*, input::*, map::*, networking::*, structure::*,
 };
+
+pub enum Mode {
+    Building,
+    Deploying,
+    Camera,
+}
 
 fn main() {
     let mut app = App::new();
@@ -29,7 +35,8 @@ fn main() {
         .add_plugin(NetworkingPlugin)
         .add_plugin(CameraPlugin)
         .add_plugin(AssetLoadPlugin)
-        .add_plugin(StructurePlugin);
+        .add_plugin(StructurePlugin)
+        .add_plugin(GamePlugin);
     //.add_startup_system(spawn_player);
 
     app.run();

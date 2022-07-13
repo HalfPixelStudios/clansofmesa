@@ -25,14 +25,13 @@ pub fn input_system(
     let mut pressed = PressedPack::default();
 
     if input.pressed(KeyCode::P) {
-        info!("{:?}", PLACE);
         pressed |= PLACE;
     }
     let (grid_x, grid_y) = snap_to_grid(cursor.0);
 
     NetInput {
         pressed,
-        grid_x: grid_x - 8,
-        grid_y: grid_y - 8,
+        grid_x: grid_x,
+        grid_y: grid_y,
     }
 }
