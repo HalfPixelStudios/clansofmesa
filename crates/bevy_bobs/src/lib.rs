@@ -1,3 +1,5 @@
+#[cfg(feature = "attack_pattern")]
+pub mod attack_pattern;
 pub mod component;
 pub mod misc;
 #[cfg(feature = "physics_2d")]

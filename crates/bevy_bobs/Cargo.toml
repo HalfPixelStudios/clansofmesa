@@ -23,5 +23,7 @@ default = []
 prefab = []
 physics_2d = []
 spawn_wave = []
+attack_pattern = []
 
 egui = ["dep:bevy-inspector-egui"]
+serde = []
