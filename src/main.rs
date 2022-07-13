@@ -15,6 +15,7 @@ use clansofmesa::{
     map::*,
     networking::*,
     structure::*,
+    ui::UIPlugin,
 };
 
 pub enum Mode {
@@ -33,7 +34,6 @@ fn main() {
             Schedule::default().with_stage(
                 "ROLLBACK_STAGE",
                 SystemStage::parallel()
-                    .with_system(place_structure) // .with_system_set(SystemSet::on_update(AppState::InGame).with_system(player_move_system))
                     .with_system(change_mode)
                     .with_system(dumb_ai_system)
                     .with_system(boid_ai_system),
@@ -55,6 +55,7 @@ fn main() {
         .add_plugin(CameraPlugin)
         .add_plugin(AssetLoadPlugin)
         .add_plugin(StructurePlugin)
+        .add_plugin(UIPlugin)
         .add_plugin(GamePlugin);
     // .add_plugin(EnemyPlugin);
     //.add_startup_system(spawn_player);
