@@ -4,6 +4,7 @@ use bevy_ggrs::*;
 use clansofmesa::{
     app_state::*,
     assetloader::*,
+    bullet::BulletPlugin,
     camera::*,
     enemy::{
         ai::{boid_ai_system, dumb_ai_system},
@@ -60,6 +61,7 @@ fn main() {
         .add_plugin(StructurePlugin)
         .add_plugin(UIPlugin)
         .add_plugin(GamePlugin)
+        .add_plugin(BulletPlugin)
         .add_plugin(EnemyPlugin);
     //.add_startup_system(spawn_player);
 

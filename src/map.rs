@@ -4,6 +4,8 @@ use bevy::ecs::component::*;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
+use crate::layers::{LayerName, Layers};
+
 pub struct MapPlugin;
 pub const MAPWIDTH: f32 = 256.;
 pub const MAPHEIGHT: f32 = 256.;
@@ -17,10 +19,14 @@ impl Plugin for MapPlugin {
     }
 }
 #[autodefault]
-fn setup(mut cmd: Commands, asset_server: Res<AssetServer>) {
+fn setup(mut cmd: Commands, asset_server: Res<AssetServer>, layers: Res<Layers>) {
     cmd.spawn_bundle(LdtkWorldBundle {
         transform: Transform {
-            translation: Vec3::new(-MAPWIDTH / 2., -MAPHEIGHT / 2., 0.),
+            translation: Vec3::new(
+                -MAPWIDTH / 2.,
+                -MAPHEIGHT / 2.,
+                layers.get(LayerName::Ground).z_height,
+            ),
             ..default()
         },
         ldtk_handle: asset_server.load("map/plains.ldtk"),

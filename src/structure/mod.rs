@@ -3,12 +3,16 @@ pub mod prefab;
 
 use bevy::prelude::*;
 use bevy_bobs::{
+    attack_pattern::AttackPattern,
     component::health::Health,
     prefab::{PrefabId, PrefabLib},
 };
 use bevy_ggrs::{Rollback, RollbackIdProvider};
 
-use self::prefab::TowerPrefab;
+use self::{
+    ai::{attack_system, AttackAI},
+    prefab::{AttackPreference, SimpleAttackAI, TowerPrefab},
+};
 use crate::{
     assetloader::*,
     layers::{LayerName, Layers},
@@ -20,13 +24,20 @@ const RON_STRING: &str = r#"
         cost: 100,
         sprite_index: 0,
         sprite_color: ColorRGB ( r: 1.0, g: 1.0, b: 1.0 ),
-        health: 100
+        ai: SimpleAttackAI (
+            bullet_id: "archer_bullet",
+            preference: Closest,
+            attack_range: 100.0,
+            attack_speed: 0.5,
+            attack_pattern: Straight,
+        ),
+        health: 100,
     )
 }
 "#;
 
 #[derive(Component, Clone)]
-pub struct Tower;
+pub struct Tower(PrefabId);
 
 pub struct SpawnStructureEvent {
     pub id: PrefabId,
@@ -37,12 +48,22 @@ pub struct StructurePlugin;
 impl Plugin for StructurePlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<SpawnStructureEvent>()
-            .add_system(spawn_structure)
+            .add_startup_system(setup)
+            .add_system(spawn_structure_system)
+            .add_system(despawn_structure_system)
+            .add_system(attack_system)
             .insert_resource(PrefabLib::<TowerPrefab>::new(RON_STRING));
     }
 }
 
-pub fn spawn_structure(
+fn setup(mut writer: EventWriter<SpawnStructureEvent>) {
+    writer.send(SpawnStructureEvent {
+        id: "archer_tower".into(),
+        spawn_pos: Vec2::ZERO,
+    });
+}
+
+fn spawn_structure_system(
     mut cmd: Commands,
     prefab_lib: Res<PrefabLib<TowerPrefab>>,
     asset_sheet: Res<AssetSheet>,
@@ -65,9 +86,18 @@ pub fn spawn_structure(
                 },
                 ..default()
             })
-            .insert(Tower)
+            .insert(Tower(id.into()))
             .insert(Health::new(prefab.health))
+            .insert(AttackAI::from((&prefab.ai).clone()))
             .insert(Rollback::new(rip.next_id()));
+        }
+    }
+}
+
+fn despawn_structure_system(mut cmd: Commands, query: Query<(Entity, &Tower, &Health)>) {
+    for (entity, Tower(id), health) in query.iter() {
+        if health.is_zero() {
+            cmd.entity(entity).despawn();
         }
     }
 }
