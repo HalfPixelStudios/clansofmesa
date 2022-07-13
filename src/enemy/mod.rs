@@ -33,6 +33,15 @@ const RON_STRING: &str = r#"
         ),
         sprite_index: 1,
         sprite_color: ColorRGB ( r: 1.0, g: 1.0, b: 1.0 ),
+    ),
+    "nithin": (
+        health: 100,
+        reward: 20,
+        ai: Dumb (
+        speed: 0
+        ),
+        sprite_index: 1,
+        sprite_color: ColorRGB ( r: 1.0, g:1.0, b: 1.0 )
     )
 }
 "#;
@@ -70,7 +79,7 @@ impl Plugin for EnemyPlugin {
             .insert_resource(PrefabLib::<EnemyPrefab>::new(RON_STRING))
             .add_event::<SpawnEnemyEvent>()
             .add_event::<DespawnEnemyEvent>()
-            .add_startup_system(setup)
+            // .add_startup_system(setup)
             .add_system(spawn_enemy_system)
             .add_system(despawn_enemy_system);
     }

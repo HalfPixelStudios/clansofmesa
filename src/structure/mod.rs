@@ -20,6 +20,7 @@ const RON_STRING: &str = r#"
         cost: 100,
         sprite_index: 0,
         sprite_color: ColorRGB ( r: 1.0, g: 1.0, b: 1.0 ),
+        health: 100
     )
 }
 "#;
