@@ -1,6 +1,10 @@
 use bevy::{math::Mat2, prelude::*};
 use std::f32::consts::PI;
 
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum AttackPattern {
     Straight,
     Shotgun { shots: u32, angle: f32 },

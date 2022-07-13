@@ -3,8 +3,11 @@ use std::ops::Deref;
 
 #[cfg(feature = "egui")]
 use bevy_inspector_egui::Inspectable;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 #[cfg_attr(feature = "egui", derive(Inspectable))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Component, Clone, Eq, PartialEq)]
 pub struct Health {
     original_hp: u32,
