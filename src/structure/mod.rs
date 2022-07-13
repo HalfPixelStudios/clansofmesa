@@ -66,7 +66,7 @@ pub fn spawn_structure_system(
                 },
                 ..default()
             })
-            .insert(Tower(id))
+            .insert(Tower(id.into()))
             .insert(Health::new(prefab.health))
             .insert(Rollback::new(rip.next_id()));
         }
