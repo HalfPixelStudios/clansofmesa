@@ -13,7 +13,8 @@ pub enum AttackPreference {
 #[derive(Deserialize, Clone)]
 pub struct TowerPrefab {
     pub display_name: Option<String>,
-    pub cost: u8,
+    pub health: u32,
+    pub cost: u32,
     pub sprite_index: usize,
     pub sprite_color: ColorRGB,
 }

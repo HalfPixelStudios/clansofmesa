@@ -8,4 +8,6 @@ pub mod input;
 pub mod layers;
 pub mod map;
 pub mod networking;
+pub mod player;
 pub mod structure;
+pub mod ui;
