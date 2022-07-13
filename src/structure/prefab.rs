@@ -1,6 +1,7 @@
 use bevy_bobs::prefab::{models::*, *};
 use serde::Deserialize;
 
+#[derive(Deserialize, Clone)]
 pub enum AttackPreference {
     Strongest,
     Weakest,
@@ -8,6 +9,11 @@ pub enum AttackPreference {
     Closest,
     Random,
     Enemy(String),
+}
+
+#[derive(Deserialize, Clone)]
+pub struct AttackAI {
+    pub preference: AttackPreference,
 }
 
 #[derive(Deserialize, Clone)]
