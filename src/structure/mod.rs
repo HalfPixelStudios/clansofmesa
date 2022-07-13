@@ -3,12 +3,16 @@ pub mod prefab;
 
 use bevy::prelude::*;
 use bevy_bobs::{
+    attack_pattern::AttackPattern,
     component::health::Health,
     prefab::{PrefabId, PrefabLib},
 };
 use bevy_ggrs::{Rollback, RollbackIdProvider};
 
-use self::prefab::TowerPrefab;
+use self::{
+    ai::AttackAI,
+    prefab::{AttackPreference, TowerPrefab},
+};
 use crate::{
     assetloader::*,
     layers::{LayerName, Layers},
@@ -20,7 +24,7 @@ const RON_STRING: &str = r#"
         cost: 100,
         sprite_index: 0,
         sprite_color: ColorRGB ( r: 1.0, g: 1.0, b: 1.0 ),
-        health: 100
+        health: 100,
     )
 }
 "#;
@@ -37,13 +41,21 @@ pub struct StructurePlugin;
 impl Plugin for StructurePlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<SpawnStructureEvent>()
+            .add_startup_system(setup)
             .add_system(spawn_structure_system)
             .add_system(despawn_structure_system)
             .insert_resource(PrefabLib::<TowerPrefab>::new(RON_STRING));
     }
 }
 
-pub fn spawn_structure_system(
+fn setup(mut writer: EventWriter<SpawnStructureEvent>) {
+    writer.send(SpawnStructureEvent {
+        id: "archer_tower".into(),
+        spawn_pos: Vec2::ZERO,
+    });
+}
+
+fn spawn_structure_system(
     mut cmd: Commands,
     prefab_lib: Res<PrefabLib<TowerPrefab>>,
     asset_sheet: Res<AssetSheet>,
@@ -68,12 +80,18 @@ pub fn spawn_structure_system(
             })
             .insert(Tower(id.into()))
             .insert(Health::new(prefab.health))
+            .insert(AttackAI {
+                bullet_id: "archer_bullet".into(),
+                preference: AttackPreference::Closest,
+                attack_range: 400.,
+                attack_pattern: AttackPattern::Straight,
+            })
             .insert(Rollback::new(rip.next_id()));
         }
     }
 }
 
-pub fn despawn_structure_system(mut cmd: Commands, query: Query<(Entity, &Tower, &Health)>) {
+fn despawn_structure_system(mut cmd: Commands, query: Query<(Entity, &Tower, &Health)>) {
     for (entity, Tower(id), health) in query.iter() {
         if health.is_zero() {
             cmd.entity(entity).despawn();

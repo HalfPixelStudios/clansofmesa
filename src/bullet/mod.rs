@@ -10,6 +10,20 @@ use bevy_bobs::{
 
 use self::prefab::*;
 
+const RON_STRING: &str = r#"
+{
+    "archer_bullet": (
+        damage: 10,
+        speed: 100.0,
+        lifetimes: Lifetimes (
+            distance: Some(100.0),
+        ),
+        sprite_index: 1,
+        sprite_color: ColorRGB ( r: 1.0, g: 1.0, b: 1.0 ),
+    )
+}
+"#;
+
 pub struct SpawnBulletEvent {
     pub id: PrefabId,
     pub spawn_pos: Vec2,
@@ -34,6 +48,18 @@ pub struct BulletBundle {
     pub rb: RigidBody,
     #[bundle]
     pub sprite_sheet: SpriteSheetBundle,
+}
+
+pub struct BulletPlugin;
+
+impl Plugin for BulletPlugin {
+    fn build(&self, app: &mut App) {
+        app.insert_resource(PrefabLib::<BulletPrefab>::new(RON_STRING))
+            .add_event::<SpawnBulletEvent>()
+            .add_event::<DespawnBulletEvent>()
+            .add_system(spawn_bullet_system)
+            .add_system(despawn_bullet_system);
+    }
 }
 
 pub fn spawn_bullet_system(
