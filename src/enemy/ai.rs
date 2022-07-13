@@ -14,7 +14,6 @@ pub struct DumbMoveAI {
 // ai with flocking behavior
 #[derive(Component, Default, Clone)]
 pub struct BoidMoveAI {
-    pub speed: f32,
     pub view_angle: f32,
     pub view_range: f32,
     pub coherence: f32,       // weight for coherence

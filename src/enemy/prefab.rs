@@ -3,8 +3,19 @@ use serde::Deserialize;
 
 #[derive(Deserialize, Clone)]
 pub enum AI {
-    Dumb { speed: f32 },
-    Boid { speed: f32, view_range: f32 },
+    Dumb {
+        speed: f32,
+    },
+    Boid {
+        view_angle: f32,
+        view_range: f32,
+        coherence: f32,
+        alignment: f32,
+        seperation: f32,
+        randomess: f32,
+        tracking: f32,
+        wander_angle: u32,
+    },
 }
 
 #[derive(Deserialize, Clone)]

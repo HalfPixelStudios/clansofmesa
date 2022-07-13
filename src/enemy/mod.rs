@@ -21,7 +21,16 @@ const RON_STRING: &str = r#"
     "testing_enemy": (
         health: 100,
         reward: 20,
-        ai: Boid ( speed: 80., view_range: 100. ),
+        ai: Boid (
+            view_angle: 0.,
+            view_range: 100.,
+            alignment: 1.0,
+            coherence: 1.0,
+            seperation: 5.0,
+            randomess: 1.0,
+            wander_angle: 90,
+            tracking: 0.1,
+        ),
         sprite_index: 1,
         sprite_color: ColorRGB ( r: 1.0, g: 1.0, b: 1.0 ),
     )
@@ -116,7 +125,16 @@ fn spawn_enemy_system(
                 AI::Dumb { speed } => {
                     cmd.entity(e).insert(DumbMoveAI::new(speed));
                 }
-                AI::Boid { speed, view_range } => {
+                AI::Boid {
+                    view_angle,
+                    view_range,
+                    coherence,
+                    alignment,
+                    seperation,
+                    randomess,
+                    tracking,
+                    wander_angle,
+                } => {
                     // choose random direction to head to
                     use rand::{thread_rng, Rng};
                     use std::f32::consts::PI;
@@ -126,20 +144,19 @@ fn spawn_enemy_system(
 
                     cmd.entity(e)
                         .insert(BoidMoveAI {
-                            speed,
-                            alignment: 1.0,
-                            coherence: 1.0,
-                            seperation: 5.0,
-                            randomess: 1.0,
-                            wander_angle: 90,
-                            tracking: 0.1,
-                            target: Some(Vec2::new(500., 500.)),
+                            view_angle,
                             view_range,
-                            ..default()
+                            alignment,
+                            coherence,
+                            seperation,
+                            randomess,
+                            wander_angle,
+                            tracking,
+                            target: Some(Vec2::new(500., 500.)),
                         })
                         .insert(RigidBody {
                             mass: 1.,
-                            velocity: Mat2::from_angle(angle) * Vec2::X * speed,
+                            velocity: Mat2::from_angle(angle) * Vec2::X,
                             max_velocity: Some(100.),
                             ..default()
                         });
