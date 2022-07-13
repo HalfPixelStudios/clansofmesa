@@ -1,7 +1,14 @@
 use bevy::prelude::*;
 use bevy_ggrs::*;
 use clansofmesa::{
-    app_state::*, assetloader::*, camera::*, game::*, input::*, map::*, networking::*, structure::*,
+    app_state::*,
+    assetloader::*,
+    camera::*,
+    enemy::{ai::dumb_ai_system, EnemyPlugin},
+    input::*,
+    map::*,
+    networking::*,
+    structure::*,
 };
 
 pub enum Mode {
@@ -16,11 +23,14 @@ fn main() {
     // networked systems
     GGRSPlugin::<GGRSConfig>::new()
         .with_input_system(input_system)
-        .with_input_system(input_system)
-        .with_rollback_schedule(Schedule::default().with_stage(
-            "ROLLBACK_STAGE",
-            SystemStage::parallel().with_system(place_structure), // .with_system_set(SystemSet::on_update(AppState::InGame).with_system(player_move_system))
-        ))
+        .with_rollback_schedule(
+            Schedule::default().with_stage(
+                "ROLLBACK_STAGE",
+                SystemStage::parallel()
+                    .with_system(place_structure) // .with_system_set(SystemSet::on_update(AppState::InGame).with_system(player_move_system))
+                    .with_system(dumb_ai_system),
+            ),
+        )
         .register_rollback_type::<Transform>()
         .build(&mut app);
 
@@ -36,7 +46,8 @@ fn main() {
         .add_plugin(CameraPlugin)
         .add_plugin(AssetLoadPlugin)
         .add_plugin(StructurePlugin)
-        .add_plugin(GamePlugin);
+        .add_plugin(GamePlugin)
+        .add_plugin(EnemyPlugin);
     //.add_startup_system(spawn_player);
 
     app.run();

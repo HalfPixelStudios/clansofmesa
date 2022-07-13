@@ -30,4 +30,7 @@ impl Displacement {
         }
         self.prev_pos = Some(new_pos);
     }
+    pub fn reset(&mut self) {
+        self.total_distance = 0.;
+    }
 }
