@@ -24,6 +24,7 @@ prefab = []
 physics_2d = []
 spawn_wave = []
 attack_pattern = []
+health_bar = []
 
 egui = ["dep:bevy-inspector-egui"]
 serde = []
