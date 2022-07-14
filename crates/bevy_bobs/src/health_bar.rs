@@ -94,7 +94,6 @@ fn health_bar_system(
     for (health_bar, children) in parent_query.iter() {
         for &child in children.iter() {
             if let Ok(mut sprite) = fg_query.get_mut(child) {
-                println!("new percent {}", health_bar.percent);
                 sprite.custom_size = Some(Vec2::new(
                     health_bar.dimension.x * health_bar.percent,
                     health_bar.dimension.y,

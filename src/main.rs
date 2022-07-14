@@ -56,7 +56,7 @@ fn main() {
         });
 
     app.add_plugins(DefaultPlugins)
-        // .add_plugin(MapPlugin)
+        .add_plugin(MapPlugin)
         .add_plugin(PhysicsPlugin)
         .add_plugin(NetworkingPlugin)
         .add_plugin(CameraPlugin)
@@ -71,9 +71,11 @@ fn main() {
     app.insert_resource(Layers::new());
 
     // some temp stuff
+    /*
     app.add_plugin(HealthBarPlugin)
         .add_startup_system(setup)
         .add_system(update);
+    */
 
     app.run();
 }
