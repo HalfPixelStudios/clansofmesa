@@ -1,5 +1,8 @@
 use bevy::prelude::*;
-use bevy_bobs::physics_2d::PhysicsPlugin;
+use bevy_bobs::{
+    health_bar::{spawn_health_bar, HealthBar, HealthBarPlugin, HealthBarPrefab},
+    physics_2d::PhysicsPlugin,
+};
 use bevy_ggrs::*;
 use clansofmesa::{
     app_state::*,
@@ -53,7 +56,7 @@ fn main() {
         });
 
     app.add_plugins(DefaultPlugins)
-        .add_plugin(MapPlugin)
+        // .add_plugin(MapPlugin)
         .add_plugin(PhysicsPlugin)
         .add_plugin(NetworkingPlugin)
         .add_plugin(CameraPlugin)
@@ -67,5 +70,28 @@ fn main() {
 
     app.insert_resource(Layers::new());
 
+    // some temp stuff
+    app.add_plugin(HealthBarPlugin)
+        .add_startup_system(setup)
+        .add_system(update);
+
     app.run();
+}
+
+fn setup(mut cmd: Commands) {
+    spawn_health_bar(
+        &mut cmd,
+        HealthBarPrefab {
+            dimension: Vec2::new(100., 20.),
+            bg_color: Color::BLACK,
+            fg_color: Color::GREEN,
+            translation: Vec3::new(0., 0., 200.),
+        },
+    );
+}
+
+fn update(mut cmd: Commands, mut query: Query<&mut HealthBar>) {
+    for mut health_bar in query.iter_mut() {
+        health_bar.add_percent(-0.001);
+    }
 }
